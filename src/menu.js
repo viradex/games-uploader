@@ -5,25 +5,12 @@ const createAppMenu = (win) => {
     {
       label: "File",
       submenu: [
-        {
-          label: "Upload Video",
-          click: () => {
-            win.webContents.send("select-video"); // TODO fix, currently does nothing
-          },
-        },
-        {
-          label: "Cancel Uploads",
-          click: () => {
-            dialog.showMessageBox(win, {
-              message: "This feature has not yet been implemented!",
-              title: "Not Implemented",
-              type: "warning",
-              buttons: ["OK"],
-              defaultId: 0,
-            });
-          },
-        },
-        { type: "separator" },
+        // {
+        //   label: "Upload Video",
+        //   click: () => {
+        //     win.webContents.send("select-video"); // TODO fix, currently does nothing
+        //   },
+        // },
         {
           label: "Settings",
           click: () => {
@@ -37,6 +24,7 @@ const createAppMenu = (win) => {
             });
           },
         },
+        { type: "separator" },
         { role: "quit" },
       ],
     },

@@ -15,10 +15,14 @@
         <div class="uploadCard">
           <div class="uploadHeader">
             <div class="uploadTitle">
-              Minecraft 06/04/2025 11:13:06
+              Minecraft 2025/06/04 11:13:06
               <span class="uploadLength">• 1:16:34</span>
             </div>
-            <div class="uploadFilename">MedalTVMinecraft20250604113106.mp4</div>
+
+            <div class="uploadFilenameWrapper">
+              <div class="uploadFilename">MedalTVMinecraft20250604113106.mp4</div>
+              <button class="deleteBtn" title="Cancel upload">🗑️</button>
+            </div>
           </div>
 
           <div class="uploadProgress">
@@ -32,11 +36,19 @@
         </div>
       </div>
 
-      <div id="shutdownOption">
+      <div class="checkboxWrapper">
         <label class="checkboxContainer">
-          <input type="checkbox" id="shutdownCheckbox" />
+          <input type="checkbox" id="muteFinishPopups" />
           <span class="checkmark"></span>
-          <span class="checkboxLabel">Shutdown computer once all uploads are completed</span>
+          <span class="checkboxLabel">Do not show completion pop-ups</span>
+        </label>
+      </div>
+
+      <div class="checkboxWrapper">
+        <label class="checkboxContainer">
+          <input type="checkbox" id="shutDownWhenComplete" />
+          <span class="checkmark"></span>
+          <span class="checkboxLabel">Shut down computer after all uploads finish</span>
         </label>
       </div>
     </div>

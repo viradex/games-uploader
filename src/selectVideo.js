@@ -9,18 +9,8 @@ const selectVideo = async (win) => {
     properties: ["openFile", "multiSelections"],
   });
 
-  if (files.canceled || !files.filePaths.length) {
-    dialog.showMessageBox(win, {
-      type: "warning",
-      title: "Warning",
-      message: "No videos were selected!",
-      buttons: ["OK"],
-      defaultId: 0,
-    });
-    return [];
-  } else {
-    return files.filePaths;
-  }
+  if (files.canceled || !files.filePaths.length) return [];
+  else return files.filePaths;
 };
 
 module.exports = selectVideo;

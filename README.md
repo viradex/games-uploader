@@ -11,6 +11,8 @@ The `config.json` file is required for the app to run and follows this syntax:
   "clientSecrets": "client_secrets.json",
   "tokenPath": "token.json",
   "defaultDirectory": "",
+  "muteFinishPopups": false,
+  "shutdownOnComplete": false,
   "playlists": {
     "2025/11": "PLExamplePlaylistID202511",
     "2025/12": "PLExamplePlaylistID202512",
@@ -34,6 +36,11 @@ The file that is created when the app is run for the first time with client secr
 
 The default directory to open when selecting videos. If none is specified, it opens the previously opened directory.
 
+### Mute Finish Popups and Shutdown on Complete
+
+Sets a default value when opening the app for the state of the checkboxes.
+These settings can be modified in the app itself, however, they are not permanent and will be reverted on the next app restart unless permanently changed in the configuration file.
+
 ### Playlists
 
 The playlists are structured into years and months. Depending on the date of the video, it will be uploaded to the respective playlist.
@@ -41,12 +48,14 @@ The playlists are structured into years and months. Depending on the date of the
 If no playlist could be found, it uploads to the default, which is always required.
 If year/month sorting is not required, only the default value should remain.
 
+The 'default' value is mandatory! All other values are optional.
+
 A basic example which uploads videos that were made during December 2025 into a specific playlist:
 
 ```json
 {
   "playlists": {
-    "2025/12": "PLExamplePlaylistID202511"
+    "2025/12": "PLExamplePlaylistID202511",
     "default": "PLExampleDefaultPlaylistID"
   }
 }

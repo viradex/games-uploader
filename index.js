@@ -12,7 +12,7 @@ let win; // So other functions can access it
 const createWindow = () => {
   win = new BrowserWindow({
     width: 900,
-    height: 610,
+    height: 640,
     resizable: true,
     backgroundColor: "#1e1e1e",
     webPreferences: {
@@ -27,19 +27,6 @@ const createWindow = () => {
   createAppMenu(win);
 };
 
-ipcMain.on("select-video", async (event) => {
-  const videos = await selectVideo(win);
-  const details = [];
-
-  // Use for..of instead of forEach due to async functions
-  for (const video of videos) {
-    const info = await getDetails(video);
-    details.push(info);
-  }
-
-  console.log(details);
-});
-
 app.whenReady().then(() => {
   try {
     config = getConfig();
@@ -48,6 +35,20 @@ app.whenReady().then(() => {
     console.error(`Error! ${err.message}`);
     app.quit();
   }
+});
+
+ipcMain.on("select-video", async (event) => {
+  const videos = await selectVideo(win);
+  const details = [];
+
+  // Use for..of instead of forEach due to async functions
+  for (const video of videos) {
+    const info = await getDetails(video, config);
+    details.push(info);
+  }
+
+  if (!details.length) return;
+  console.log(details);
 });
 
 app.on("window-all-closed", () => {

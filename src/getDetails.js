@@ -1,6 +1,7 @@
 const path = require("path");
 const fs = require("fs").promises;
 const { execFile } = require("child_process");
+const crypto = require("crypto");
 
 const ffprobePath = require("ffprobe-static").path; // Binary location
 
@@ -83,7 +84,27 @@ const getSize = async (filePath) => {
   return (stats.size / (1024 * 1024)).toFixed(2);
 };
 
-const getDetails = async (videoPath) => {
+const getPlaylist = (title, config) => {
+  const playlists = config.playlists;
+  const match = title.match(/\d{4}\/\d{2}/);
+  const configKey = match ? match[0] : "default";
+
+  let playlistID = "";
+  for (const playlist in playlists) {
+    if (playlist === configKey) {
+      playlistID = playlists[playlist];
+    }
+  }
+
+  if (!playlistID) {
+    playlistID = playlists["default"];
+  }
+
+  return playlistID;
+};
+
+const getDetails = async (videoPath, config) => {
+  const uuid = crypto.randomUUID(); // For identifying different upload cards from each other
   const filename = path.basename(videoPath);
   const title = parseVideoTitle(filename);
 
@@ -92,12 +113,16 @@ const getDetails = async (videoPath) => {
 
   const totalSize = await getSize(videoPath);
 
+  const playlist = getPlaylist(title, config);
+
   return {
     videoPath,
+    uuid,
     filename,
     title,
     duration,
     totalSize,
+    playlist,
   };
 };
 

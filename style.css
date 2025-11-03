@@ -92,8 +92,8 @@ body {
   color: #cccccc;
 }
 
-/* Shutdown checkbox styling */
-#shutdownOption {
+/* Checkbox styling */
+.checkboxWrapper {
   margin-top: 3px;
   width: 100%;
   display: flex;
@@ -129,17 +129,17 @@ body {
 }
 
 .checkboxContainer input:checked ~ .checkmark {
-  background-color: #0078d4; /* Windows 11 blue */
+  background-color: #5ec8ff;
 }
 
 .checkmark::after {
   content: "";
   display: none;
-  width: 4px;
-  height: 8px;
+  width: 3px;
+  height: 6px;
   border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
 }
 
 .checkboxContainer input:checked ~ .checkmark::after {
@@ -196,4 +196,29 @@ body {
   font-size: 13px;
   color: #cccccc;
   text-align: right;
+}
+
+.uploadFilenameWrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Delete button styling */
+.deleteBtn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 12px; /* Tiny button */
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.deleteBtn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
