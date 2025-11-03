@@ -1,0 +1,23 @@
+{
+  "name": "games-uploader",
+  "version": "1.0.0",
+  "description": "Uploads clips of games from Medal.tv or other screen recorders!",
+  "homepage": "https://github.com/viradex/games-uploader#readme",
+  "bugs": {
+    "url": "https://github.com/viradex/games-uploader/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/viradex/games-uploader.git"
+  },
+  "license": "MIT",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "electron": "^39.0.0"
+  }
+}

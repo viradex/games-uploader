@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouTube Uploader</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <button id="uploadBtn">Upload Video</button>
+
+      <div id="uploadContainer">
+        <div class="uploadCard">
+          <div class="uploadHeader">
+            <div class="uploadTitle">
+              Minecraft 06/04/2025 11:13:06
+              <span class="uploadLength">• 1:16:34</span>
+            </div>
+            <div class="uploadFilename">MedalTVMinecraft06042025113106.mp4</div>
+          </div>
+
+          <div class="uploadProgress">
+            <div class="uploadProgressBar" style="width: 78%"></div>
+          </div>
+
+          <div class="uploadFooter">
+            <div class="uploadStatus">Uploading... 78%</div>
+            <div class="uploadSize">734 MB / 1046 MB</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="shutdownOption">
+        <label class="checkboxContainer">
+          <input type="checkbox" id="shutdownCheckbox" />
+          <span class="checkmark"></span>
+          <span class="checkboxLabel">Shutdown computer when all uploads are completed</span>
+        </label>
+      </div>
+    </div>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>

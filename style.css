@@ -1,0 +1,199 @@
+/* Global layout and color scheme */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #1e1e1e;
+  color: #ffffff;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100vh;
+}
+
+/* Main app container */
+#app {
+  margin-top: 10px; /* Button closer to top */
+  width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Upload button */
+#uploadBtn {
+  width: 100%; /* Same width as box */
+  height: 30px; /* Slightly smaller height */
+  background-color: #3c3c3c;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-family: inherit; /* Same as other text */
+  font-size: 12px; /* Smaller text */
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+#uploadBtn:hover {
+  background-color: #4a4a4a;
+}
+
+#uploadBtn:active {
+  transform: scale(0.98);
+}
+
+/* Upload container box */
+#uploadContainer {
+  width: 100%;
+  background-color: #2d2d2d;
+  border-radius: 10px;
+  padding: 20px;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  overflow-y: auto;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Individual upload entry */
+.uploadCard {
+  background-color: #252525;
+  border-radius: 6px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.uploadTitle {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.uploadProgress {
+  width: 100%;
+  height: 6px;
+  background-color: #3a3a3a;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.uploadProgressBar {
+  height: 100%;
+  background-color: #ff3d00;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.uploadStatus {
+  font-size: 13px;
+  color: #cccccc;
+}
+
+/* Shutdown checkbox styling */
+#shutdownOption {
+  margin-top: 3px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Container for custom checkbox */
+.checkboxContainer {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  margin-left: 5px; /* Moved closer to left */
+}
+
+.checkboxContainer input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkmark {
+  height: 14px;
+  width: 14px;
+  background-color: #3a3a3a;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkboxContainer input:checked ~ .checkmark {
+  background-color: #0078d4; /* Windows 11 blue */
+}
+
+.checkmark::after {
+  content: "";
+  display: none;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkboxContainer input:checked ~ .checkmark::after {
+  display: block;
+}
+
+.checkboxLabel {
+  font-size: 12px;
+  color: #cccccc;
+}
+
+/* Upload card header */
+.uploadHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+/* Video title + length */
+.uploadTitle {
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: #ffffff;
+}
+
+.uploadLength {
+  font-size: 13px;
+  color: #aaaaaa;
+}
+
+/* Filename (right-aligned) */
+.uploadFilename {
+  font-size: 13px;
+  color: #aaaaaa;
+  text-align: right;
+}
+
+/* Footer with status + size */
+.uploadFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.uploadStatus {
+  font-size: 13px;
+  color: #cccccc;
+}
+
+.uploadSize {
+  font-size: 13px;
+  color: #cccccc;
+  text-align: right;
+}
