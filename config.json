@@ -1,0 +1,10 @@
+{
+  "clientSecrets": "client_secrets.json",
+  "tokenPath": "token.json",
+  "defaultDirectory": "",
+  "playlists": {
+    "2025/11": "PLExamplePlaylistID202511",
+    "2025/12": "PLExamplePlaylistID202512",
+    "default": "PLExampleDefaultPlaylistID"
+  }
+}

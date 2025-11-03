@@ -1,16 +1,18 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 
+const getConfig = require("./src/config.js");
 const createAppMenu = require("./src/menu.js");
 const selectVideo = require("./src/selectVideo.js");
 const getDetails = require("./src/getDetails.js");
 
+let config; // Config data
 let win; // So other functions can access it
 
 const createWindow = () => {
   win = new BrowserWindow({
     width: 900,
-    height: 650,
+    height: 610,
     resizable: true,
     backgroundColor: "#1e1e1e",
     webPreferences: {
@@ -38,7 +40,15 @@ ipcMain.on("select-video", async (event) => {
   console.log(details);
 });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  try {
+    config = getConfig();
+    createWindow();
+  } catch (err) {
+    console.error(`Error! ${err.message}`);
+    app.quit();
+  }
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();

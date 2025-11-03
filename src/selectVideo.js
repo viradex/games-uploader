@@ -17,6 +17,7 @@ const selectVideo = async (win) => {
       buttons: ["OK"],
       defaultId: 0,
     });
+    return [];
   } else {
     return files.filePaths;
   }
