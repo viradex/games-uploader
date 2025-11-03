@@ -1,10 +1,14 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 
 const createAppMenu = require("./src/menu.js");
+const selectVideo = require("./src/selectVideo.js");
+const getDetails = require("./src/getDetails.js");
+
+let win; // So other functions can access it
 
 const createWindow = () => {
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 900,
     height: 650,
     resizable: true,
@@ -22,21 +26,16 @@ const createWindow = () => {
 };
 
 ipcMain.on("select-video", async (event) => {
-  const result = await dialog.showOpenDialog({
-    properties: ["openFile", "multiSelections"],
-    filters: [{ name: "Videos", extensions: ["mp4", "mov", "avi", "mkv"] }],
-  });
+  const videos = await selectVideo(win);
+  const details = [];
 
-  if (!result.canceled && result.filePaths.length > 0) {
-    result.filePaths.forEach((filePath) => {
-      event.sender.send("new-upload", {
-        title: path.parse(filePath).name,
-        filename: path.basename(filePath),
-        length: "Unknown",
-        size: "Unknown",
-      });
-    });
+  // Use for..of instead of forEach due to async functions
+  for (const video of videos) {
+    const info = await getDetails(video);
+    details.push(info);
   }
+
+  console.log(details);
 });
 
 app.whenReady().then(createWindow);

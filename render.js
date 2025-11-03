@@ -4,6 +4,6 @@ uploadBtn.addEventListener("click", () => {
   window.electronAPI.selectVideo();
 });
 
-window.electronAPI.onNewUpload((_, uploadInfo) => {
+window.electronAPI.newUpload((_, uploadInfo) => {
   addUploadCard(uploadInfo);
 });
