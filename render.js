@@ -12,7 +12,3 @@ window.electronAPI.onVideoDetails((details) => {
     addUploadCard(video, uploadContainer);
   });
 });
-
-window.electronAPI.newUpload((_, uploadInfo) => {
-  addUploadCard(uploadInfo);
-});

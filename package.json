@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "electron": "^39.0.0",
-    "ffprobe-static": "^3.1.0"
+    "ffprobe-static": "^3.1.0",
+    "googleapis": "^164.1.0"
   }
 }

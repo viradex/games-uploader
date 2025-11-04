@@ -41,6 +41,8 @@ The default directory to open when selecting videos. If none is specified, it op
 Sets a default value when opening the app for the state of the checkboxes.
 These settings can be modified in the app itself, however, they are not permanent and will be reverted on the next app restart unless permanently changed in the configuration file.
 
+If the shutdown on complete option is set to `true`, the mute finish pop-ups option will be set to `true` regardless of the value entered.
+
 ### Playlists
 
 The playlists are structured into years and months. Depending on the date of the video, it will be uploaded to the respective playlist.

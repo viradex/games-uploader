@@ -42,7 +42,6 @@ const removeUploadCard = async (uuid) => {
       message: "Are you sure you want to cancel this upload? This cannot be undone!",
       type: "warning",
       buttons: ["OK", "Cancel"],
-      defaultId: 1,
       title: "Cancel Upload",
     });
 
