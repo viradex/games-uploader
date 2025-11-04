@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 
 const getConfig = require("./src/config.js");
@@ -13,7 +13,7 @@ const createWindow = () => {
   win = new BrowserWindow({
     width: 900,
     height: 640,
-    resizable: true,
+    resizable: false,
     backgroundColor: "#1e1e1e",
     webPreferences: {
       nodeIntegration: false,
@@ -49,6 +49,12 @@ ipcMain.on("select-video", async (event) => {
 
   if (!details.length) return;
   console.log(details);
+  win.webContents.send("video-details", details);
+});
+
+ipcMain.handle("show-dialog", async (event, options) => {
+  const result = await dialog.showMessageBox(win, options);
+  return result;
 });
 
 app.on("window-all-closed", () => {

@@ -2,5 +2,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
   selectVideo: () => ipcRenderer.send("select-video"),
-  newUpload: (callback) => ipcRenderer.on("new-upload", callback),
+  onVideoDetails: (callback) =>
+    ipcRenderer.on("video-details", (event, details) => callback(details)),
+  showDialog: (options) => ipcRenderer.invoke("show-dialog", options),
 });

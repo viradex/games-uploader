@@ -10,7 +10,7 @@ const getConfig = () => {
   if (!fs.existsSync(configPath)) {
     dialog.showErrorBox(
       "Missing Configuration File",
-      `The required configuration file could not be found at the following path: ${configPath}\n\nPlease verify that the file exists and try again.`
+      `The required configuration file could not be found at the following path: ${configPath}\n\nPlease verify that the file exists and try again.\nInformation on how to create the config.json file can be found in the README.`
     );
     throw new Error("Missing configuration file");
   }
