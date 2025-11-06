@@ -73,8 +73,11 @@ ipcMain.on("start-upload", async (event, details) => {
   );
 
   uploads.set(details.uuid, uploadInstance);
-  console.log("Upload started kinda");
-  console.log(uploads);
+  console.log(`Upload started for ${details.uuid} (${details.title})!`);
+
+  uploadInstance.startUpload((progress) => {
+    win.webContents.send("upload-progress", progress);
+  });
 });
 
 ipcMain.on("cancel-upload", async (event, uuid) => {

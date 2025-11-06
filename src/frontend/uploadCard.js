@@ -35,6 +35,18 @@ const addUploadCard = (upload, container) => {
   window.electronAPI.startUpload(upload);
 };
 
+const updateCard = async (uuid, percentDone, sizeDone, totalSize, speed) => {
+  const card = document.getElementById(uuid);
+
+  const progressBar = card.querySelector(".uploadProgressBar");
+  const status = card.querySelector(".uploadStatus");
+  const sizeText = card.querySelector(".uploadSize");
+
+  progressBar.style.width = `${percentDone}%`;
+  status.textContent = percentDone < 100 ? `Uploading... (${percentDone}%)` : "Completed!";
+  sizeText.textContent = `${sizeDone.toFixed(2)} MB / ${totalSize} MB (${speed.toFixed(2)} MB/s)`;
+};
+
 const removeUploadCard = async (uuid) => {
   const card = document.getElementById(uuid);
   if (card) {
@@ -52,4 +64,4 @@ const removeUploadCard = async (uuid) => {
   }
 };
 
-export { addUploadCard, removeUploadCard };
+export { addUploadCard, updateCard, removeUploadCard };

@@ -1,4 +1,4 @@
-import { addUploadCard } from "./src/frontend/uploadCard.js";
+import { addUploadCard, updateCard } from "./src/frontend/uploadCard.js";
 
 const uploadBtn = document.getElementById("uploadBtn");
 const uploadContainer = document.getElementById("uploadContainer");
@@ -11,4 +11,9 @@ window.electronAPI.onVideoDetails((details) => {
   details.forEach((video) => {
     addUploadCard(video, uploadContainer);
   });
+});
+
+window.electronAPI.onUploadProgress((details) => {
+  const { uuid, percentDone, sizeDone, totalSize, speed } = details;
+  updateCard(uuid, percentDone, sizeDone, totalSize, speed);
 });
