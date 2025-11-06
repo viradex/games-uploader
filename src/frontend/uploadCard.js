@@ -32,6 +32,7 @@ const addUploadCard = (upload, container) => {
   });
 
   container.appendChild(card);
+  window.electronAPI.startUpload(upload);
 };
 
 const removeUploadCard = async (uuid) => {
@@ -46,6 +47,7 @@ const removeUploadCard = async (uuid) => {
 
     if (result.response === 0) {
       card.remove();
+      window.electronAPI.cancelUpload(uuid);
     }
   }
 };

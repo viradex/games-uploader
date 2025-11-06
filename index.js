@@ -6,10 +6,13 @@ const createAppMenu = require("./src/backend/menu.js");
 const selectVideo = require("./src/backend/selectVideo.js");
 const getDetails = require("./src/backend/getDetails.js");
 const { getTokens } = require("./src/backend/auth/googleAuth.js");
+const Upload = require("./src/backend/upload.js");
 
 let config;
 let win; // So other functions can access it
 let tokens;
+
+const uploads = new Map();
 
 const createWindow = () => {
   win = new BrowserWindow({
@@ -56,6 +59,29 @@ ipcMain.on("select-video", async (event) => {
   if (!details.length) return;
   console.log(details);
   win.webContents.send("video-details", details);
+});
+
+ipcMain.on("start-upload", async (event, details) => {
+  const uploadInstance = new Upload(
+    details.uuid,
+    details.videoPath,
+    details.filename,
+    details.title,
+    details.duration,
+    details.totalSize,
+    details.playlist
+  );
+
+  uploads.set(details.uuid, uploadInstance);
+  console.log("Upload started kinda");
+  console.log(uploads);
+});
+
+ipcMain.on("cancel-upload", async (event, uuid) => {
+  uploads.delete(uuid);
+
+  console.log("Deleted, new Map");
+  console.log(uploads);
 });
 
 ipcMain.handle("show-dialog", async (event, options) => {
