@@ -1,6 +1,4 @@
 {
-  "clientSecrets": "client_secrets.json",
-  "tokenPath": "token.json",
   "defaultDirectory": "",
   "muteFinishPopups": false,
   "shutdownOnComplete": false,

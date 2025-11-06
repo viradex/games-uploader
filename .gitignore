@@ -139,7 +139,7 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 # Sensitive data
-/src/auth/oauth_data
-/src/auth/client_secrets.json
-/src/auth/token.json
-/src/auth/token.pickle
+/src/backend/auth/oauth_data
+/src/backend/auth/client_secrets.json
+/src/backend/auth/token.json
+/src/backend/auth/token.pickle

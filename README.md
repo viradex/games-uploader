@@ -8,8 +8,6 @@ The `config.json` file is required for the app to run and follows this syntax:
 
 ```json
 {
-  "clientSecrets": "client_secrets.json",
-  "tokenPath": "token.json",
   "defaultDirectory": "",
   "muteFinishPopups": false,
   "shutdownOnComplete": false,
@@ -20,17 +18,6 @@ The `config.json` file is required for the app to run and follows this syntax:
   }
 }
 ```
-
-### Client Secrets
-
-From the Google Cloud Console, creating a new project should give a JSON file.
-Put the filename and path to that downloaded file and ensure it does not change!
-
-**DO NOT SHARE THIS FILE!!! Treat it like a password!**
-
-### Token Path
-
-The file that is created when the app is run for the first time with client secrets.
 
 ### Default Directory
 

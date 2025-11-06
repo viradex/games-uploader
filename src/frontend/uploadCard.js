@@ -37,7 +37,6 @@ const addUploadCard = (upload, container) => {
 const removeUploadCard = async (uuid) => {
   const card = document.getElementById(uuid);
   if (card) {
-    console.log("hi");
     const result = await window.electronAPI.showDialog({
       message: "Are you sure you want to cancel this upload? This cannot be undone!",
       type: "warning",

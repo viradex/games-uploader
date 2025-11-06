@@ -1,12 +1,14 @@
 const fs = require("fs");
 const path = require("path");
 const http = require("http");
-const { shell } = require("electron");
+const { app, shell, dialog } = require("electron");
+
+const userDataPath = app.getPath("userData");
 
 const REDIRECT_PORT = 52719;
 const REDIRECT_URI = `http://127.0.0.1:${REDIRECT_PORT}`;
-const TOKEN_PATH = path.join(__dirname, "token.json");
-const CLIENT_SECRETS_PATH = path.join(__dirname, "client_secrets.json");
+const TOKEN_PATH = path.join(userDataPath, "token.json");
+const CLIENT_SECRETS_PATH = path.join(__dirname, "client_secrets.json"); // temp TODO see if it works when built
 
 const startOAuthFlow = async () => {
   const creds = JSON.parse(fs.readFileSync(CLIENT_SECRETS_PATH, "utf8")).installed;
@@ -130,6 +132,26 @@ const refreshAccessToken = async (tokens) => {
   return tokens;
 };
 
+const getTokens = async (win) => {
+  let tokens = getSavedTokens();
+  if (!tokens || tokensExpired(tokens)) {
+    await dialog.showMessageBox(win, {
+      type: "warning",
+      buttons: ["OK"],
+      defaultId: 0,
+      title: "Google Authentication Required",
+      message:
+        "Your token has expired or does not exist. Please sign in to your Google account that you want to upload videos to.\n\nA webpage should open after closing this message. If it doesn't, see the console for the URL and enter it manually.",
+    });
+
+    const code = await startOAuthFlow();
+    tokens = await exchangeCodeForTokens(code);
+    saveTokens(tokens);
+  }
+
+  return tokens;
+};
+
 module.exports = {
   startOAuthFlow,
   getSavedTokens,
@@ -137,4 +159,5 @@ module.exports = {
   tokensExpired,
   exchangeCodeForTokens,
   refreshAccessToken,
+  getTokens,
 };
