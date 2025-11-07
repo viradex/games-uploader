@@ -1,6 +1,8 @@
 const { google } = require("googleapis");
 const fs = require("fs");
 
+const { refreshAccessToken } = require("./auth/googleAuth.js");
+
 class Upload {
   /**
    * Initializes a single video Upload instance.
@@ -41,18 +43,17 @@ class Upload {
     });
   }
 
-  #initOAuth() {
+  async #initOAuth() {
+    if (!this.tokens.access_token || Date.now() > this.tokens.expiry_date) {
+      this.tokens = await refreshAccessToken(this.tokens);
+    }
+
     const oauth2Client = new google.auth.OAuth2(
       this.tokens.client_id,
       this.tokens.client_secret,
       this.tokens.redirect_uri
     );
-
-    oauth2Client.setCredentials({
-      access_token: this.tokens.access_token,
-      refresh_token: this.tokens.refresh_token,
-      expiry_date: Date.now() + this.tokens.expires_in * 1000,
-    });
+    oauth2Client.setCredentials(this.tokens);
 
     return google.youtube({ version: "v3", auth: oauth2Client });
   }
@@ -73,7 +74,7 @@ class Upload {
       this.status = "auth";
       this.#emit(progressCallback);
 
-      const youtube = this.#initOAuth();
+      const youtube = await this.#initOAuth();
       await youtube.channels.list({ part: "snippet", mine: true });
 
       this.status = "upload";

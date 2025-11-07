@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const http = require("http");
 const { app, shell, dialog } = require("electron");
+const { google } = require("googleapis");
 
 const userDataPath = app.getPath("userData");
 
@@ -125,16 +126,19 @@ const refreshAccessToken = async (tokens) => {
   });
 
   if (!res.ok) throw new Error(`Token refresh failed: ${res.statusText}`);
+
   const data = await res.json();
   tokens.access_token = data.access_token;
   tokens.expiry_date = Date.now() + data.expires_in * 1000;
+
   saveTokens(tokens);
   return tokens;
 };
 
 const getTokens = async (win) => {
   let tokens = getSavedTokens();
-  if (!tokens || tokensExpired(tokens)) {
+
+  if (!tokens) {
     await dialog.showMessageBox(win, {
       type: "warning",
       buttons: ["OK"],
@@ -148,6 +152,23 @@ const getTokens = async (win) => {
     tokens = await exchangeCodeForTokens(code);
     saveTokens(tokens);
   }
+
+  const creds = JSON.parse(fs.readFileSync(CLIENT_SECRETS_PATH, "utf8")).installed;
+  const oauth2Client = new google.auth.OAuth2(creds.client_id, creds.client_secret, REDIRECT_URI);
+  oauth2Client.setCredentials(tokens);
+
+  if (!tokens.access_token || Date.now() > tokens.expiry_date) {
+    console.log("Access token expired, refreshing...");
+    tokens = await refreshAccessToken(tokens);
+    oauth2Client.setCredentials(tokens);
+  }
+
+  oauth2Client.on("tokens", (newTokens) => {
+    if (newTokens.refresh_token) tokens.refresh_token = newTokens.refresh_token;
+    if (newTokens.access_token) tokens.access_token = newTokens.access_token;
+    if (newTokens.expiry_date) tokens.expiry_date = newTokens.expiry_date;
+    saveTokens(tokens);
+  });
 
   return tokens;
 };
