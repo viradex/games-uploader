@@ -28,7 +28,7 @@ const addUploadCard = (upload, container) => {
 
   const deleteBtn = card.querySelector(".deleteBtn");
   deleteBtn.addEventListener("click", async () => {
-    await removeUploadCard(upload.uuid);
+    await removeUploadCard(upload.uuid, true);
   });
 
   container.appendChild(card);
@@ -75,19 +75,23 @@ const updateCard = async (uuid, status, percentDone, sizeDone, totalSize, speed)
   sizeText.textContent = `${sizeDone.toFixed(2)} MB / ${totalSize} MB (${speed.toFixed(2)} MB/s)`;
 };
 
-const removeUploadCard = async (uuid) => {
+const removeUploadCard = async (uuid, manuallyCalled) => {
   const card = document.getElementById(uuid);
   if (card) {
-    const result = await window.electronAPI.showDialog({
-      message: "Are you sure you want to cancel this upload? This cannot be undone!",
-      type: "warning",
-      buttons: ["OK", "Cancel"],
-      title: "Cancel Upload",
-    });
+    if (manuallyCalled) {
+      const result = await window.electronAPI.showDialog({
+        message: "Are you sure you want to cancel this upload? This cannot be undone!",
+        type: "warning",
+        buttons: ["OK", "Cancel"],
+        title: "Cancel Upload",
+      });
 
-    if (result.response === 0) {
+      if (result.response === 0) {
+        card.remove();
+        window.electronAPI.cancelUpload(uuid);
+      }
+    } else {
       card.remove();
-      window.electronAPI.cancelUpload(uuid);
     }
   }
 };

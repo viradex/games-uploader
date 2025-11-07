@@ -3,6 +3,7 @@ const fs = require("fs");
 const { dialog } = require("electron");
 
 const { refreshAccessToken } = require("./auth/googleAuth.js");
+const { sleep } = require("../utils.js");
 
 class Upload {
   /**
@@ -147,21 +148,31 @@ class Upload {
           buttons: ["OK"],
           title: "Successful Upload",
         });
+      } else {
+        await sleep(2000);
       }
+
+      return true;
     } catch (err) {
       this.status = "fail";
       this.#emit(progressCallback);
 
-      dialog.showErrorBox(
-        "Failed to Upload Video",
-        `An error occurred while uploading the video "${
+      // Do not use showErrorBox() due to it being synchronous
+      await dialog.showMessageBox(this.win, {
+        type: "error",
+        title: "Failed to Upload Video",
+        message: `An error occurred while uploading the video "${
           this.title
         }". The console has more detailed error information that can be reported to the developer if necessary.\n\nError message: ${
           err.message || "N/A"
-        }`
-      );
+        }`,
+        buttons: ["OK"],
+      });
+
       console.log(`Uploading the video ${this.title} with UUID of ${this.uuid} has failed!`);
       console.log(err);
+
+      return false;
     }
   }
 }

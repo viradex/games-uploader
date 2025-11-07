@@ -6,6 +6,7 @@ const createAppMenu = require("./src/backend/menu.js");
 const selectVideo = require("./src/backend/selectVideo.js");
 const getDetails = require("./src/backend/getDetails.js");
 const { getTokens } = require("./src/backend/auth/googleAuth.js");
+const { confirmCloseApp } = require("./src/utils.js");
 const Upload = require("./src/backend/upload.js");
 
 let config;
@@ -26,6 +27,17 @@ const createWindow = () => {
       preload: path.join(__dirname, "preload.js"),
     },
     icon: path.join(__dirname, "assets", "icon.ico"),
+  });
+
+  // TODO Fix error dialog box that appears if the window is closed during an upload
+  // This is the error:
+  // TypeError: Object has been destroyed
+  //     at D:\Coding\games-uploader\index.js:94:11
+  //     at #emit (D:\Coding\games-uploader\src\backend\upload.js:50:5)
+  //     at Object.onUploadProgress (D:\Coding\games-uploader\src\backend\upload.js:116:23)
+  // Could this be fixed by using win.isDestroyed()?
+  win.on("close", async (e) => {
+    confirmCloseApp(uploads, win, e);
   });
 
   win.loadFile("index.html");
@@ -84,9 +96,17 @@ ipcMain.on("start-upload", async (event, details) => {
   uploads.set(details.uuid, uploadInstance);
   console.log(`Upload started for ${details.title} with UUID ${details.uuid}`);
 
-  uploadInstance.startUpload((progress) => {
-    win.webContents.send("upload-progress", progress);
-  });
+  try {
+    await uploadInstance.startUpload((progress) => {
+      win.webContents.send("upload-progress", progress);
+    });
+  } catch (err) {
+    console.log(`Upload failed for video ${details.title} with UUID ${details.uuid}`);
+    console.log(err);
+  } finally {
+    uploads.delete(details.uuid);
+    win.webContents.send("remove-upload", details.uuid);
+  }
 });
 
 ipcMain.on("cancel-upload", async (event, uuid) => {

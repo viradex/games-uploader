@@ -1,4 +1,4 @@
-import { addUploadCard, updateCard } from "./src/frontend/uploadCard.js";
+import { addUploadCard, updateCard, removeUploadCard } from "./src/frontend/uploadCard.js";
 
 const uploadBtn = document.getElementById("uploadBtn");
 const uploadContainer = document.getElementById("uploadContainer");
@@ -42,6 +42,10 @@ window.electronAPI.onVideoDetails((details) => {
   details.forEach((video) => {
     addUploadCard(video, uploadContainer);
   });
+});
+
+window.electronAPI.onUploadRemoval((uuid) => {
+  removeUploadCard(uuid, false);
 });
 
 window.electronAPI.onUploadProgress((details) => {

@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   startUpload: (details) => ipcRenderer.send("start-upload", details),
   onUploadProgress: (callback) =>
     ipcRenderer.on("upload-progress", (event, details) => callback(details)),
+  onUploadRemoval: (callback) => ipcRenderer.on("remove-upload", (event, uuid) => callback(uuid)),
   cancelUpload: (uuid) => ipcRenderer.send("cancel-upload", uuid),
 
   showDialog: (options) => ipcRenderer.invoke("show-dialog", options),
