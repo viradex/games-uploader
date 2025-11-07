@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 
-const getConfig = require("./src/backend/config.js");
+const { getConfig, setConfig } = require("./src/backend/config.js");
 const createAppMenu = require("./src/backend/menu.js");
 const selectVideo = require("./src/backend/selectVideo.js");
 const getDetails = require("./src/backend/getDetails.js");
@@ -38,8 +38,14 @@ app.whenReady().then(async () => {
     createWindow();
 
     tokens = await getTokens(win);
-    console.log(tokens);
     console.log("YouTube tokens obtained successfully!");
+
+    win.webContents.on("did-finish-load", () => {
+      win.webContents.send("update-checkboxes", {
+        showCompletionPopup: config.showCompletionPopup,
+        shutdownOnComplete: config.shutdownOnComplete,
+      });
+    });
   } catch (err) {
     console.log("An unexpected error occurred! Please report this to the developer:");
     console.log(err);
@@ -48,7 +54,7 @@ app.whenReady().then(async () => {
 });
 
 ipcMain.on("select-video", async (event) => {
-  const videos = await selectVideo(win);
+  const videos = await selectVideo();
   const details = [];
 
   // Use for..of instead of forEach due to async functions
@@ -58,7 +64,6 @@ ipcMain.on("select-video", async (event) => {
   }
 
   if (!details.length) return;
-  console.log(details);
   win.webContents.send("video-details", details);
 });
 
@@ -71,11 +76,13 @@ ipcMain.on("start-upload", async (event, details) => {
     details.duration,
     details.totalSize,
     details.playlist,
-    tokens
+    tokens,
+    win,
+    config.showCompletionPopup ?? true
   );
 
   uploads.set(details.uuid, uploadInstance);
-  console.log(`Upload started for ${details.uuid} (${details.title})!`);
+  console.log(`Upload started for ${details.title} with UUID ${details.uuid}`);
 
   uploadInstance.startUpload((progress) => {
     win.webContents.send("upload-progress", progress);
@@ -83,10 +90,12 @@ ipcMain.on("start-upload", async (event, details) => {
 });
 
 ipcMain.on("cancel-upload", async (event, uuid) => {
+  // TODO AbortController with Upload instance
   uploads.delete(uuid);
+});
 
-  console.log("Deleted, new Map");
-  console.log(uploads);
+ipcMain.on("update-config", (event, newValues) => {
+  setConfig(newValues);
 });
 
 ipcMain.handle("show-dialog", async (event, options) => {

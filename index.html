@@ -10,35 +10,11 @@
     <div id="app">
       <button id="uploadBtn">Upload Videos</button>
 
-      <div id="uploadContainer">
-        <!-- Test UI -->
-        <!-- <div class="uploadCard" id="f81d4fae-7dec-11d0-a765-00a0c91e6bf6">
-          <div class="uploadHeader">
-            <div class="uploadTitle">
-              Minecraft 2025/06/04 11:13:06
-              <span class="uploadLength">• 1:16:34</span>
-            </div>
-
-            <div class="uploadFilenameWrapper">
-              <div class="uploadFilename">MedalTVMinecraft20250604113106.mp4</div>
-              <button class="deleteBtn" title="Cancel upload">🗑️</button>
-            </div>
-          </div>
-
-          <div class="uploadProgress">
-            <div class="uploadProgressBar" style="width: 78%"></div>
-          </div>
-
-          <div class="uploadFooter">
-            <div class="uploadStatus">Uploading... 78%</div>
-            <div class="uploadSize">734.23 MB / 1046.67 MB (24.21 MB/s)</div>
-          </div>
-        </div> -->
-      </div>
+      <div id="uploadContainer"></div>
 
       <div class="checkboxWrapper">
         <label class="checkboxContainer">
-          <input type="checkbox" id="muteFinishPopups" />
+          <input type="checkbox" id="showCompletionPopup" />
           <span class="checkmark"></span>
           <span class="checkboxLabel">Do not show completion pop-ups</span>
         </label>
@@ -46,7 +22,7 @@
 
       <div class="checkboxWrapper">
         <label class="checkboxContainer">
-          <input type="checkbox" id="shutDownWhenComplete" />
+          <input type="checkbox" id="shutdownOnComplete" />
           <span class="checkmark"></span>
           <span class="checkboxLabel">Shut down computer after all uploads finish</span>
         </label>

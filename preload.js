@@ -5,6 +5,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onVideoDetails: (callback) =>
     ipcRenderer.on("video-details", (event, details) => callback(details)),
 
+  updateConfig: (updatedValues) => ipcRenderer.send("update-config", updatedValues),
+  onUpdateCheckboxes: (callback) =>
+    ipcRenderer.on("update-checkboxes", (event, states) => callback(states)),
+
   startUpload: (details) => ipcRenderer.send("start-upload", details),
   onUploadProgress: (callback) =>
     ipcRenderer.on("upload-progress", (event, details) => callback(details)),

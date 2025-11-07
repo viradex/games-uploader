@@ -9,7 +9,7 @@ The `config.json` file is required for the app to run and follows this syntax:
 ```json
 {
   "defaultDirectory": "",
-  "muteFinishPopups": false,
+  "showCompletionPopup": false,
   "shutdownOnComplete": false,
   "playlists": {
     "2025/11": "PLExamplePlaylistID202511",
@@ -23,12 +23,16 @@ The `config.json` file is required for the app to run and follows this syntax:
 
 The default directory to open when selecting videos. If none is specified, it opens the previously opened directory.
 
-### Mute Finish Popups and Shutdown on Complete
+Double backslashes are required if using backslashes in the path (e.g. `C:\\Data\\Videos`).
 
-Sets a default value when opening the app for the state of the checkboxes.
-These settings can be modified in the app itself, however, they are not permanent and will be reverted on the next app restart unless permanently changed in the configuration file.
+### Show Completion Popup and Shutdown on Complete
 
-If the shutdown on complete option is set to `true`, the mute finish pop-ups option will be set to `true` regardless of the value entered.
+This setting can be modified in the UI.
+
+If `showCompletionPopup` is `true`, a message box will be shown every time an upload completes.
+If `shutdownOnComplete` is `true`, the computer will automatically shutdown 60 seconds after the final video has been uploaded.
+
+If the shutdown on complete option is set to `true`, the show completion popups option will be set to `true` regardless of the value entered.
 
 ### Playlists
 

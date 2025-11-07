@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { dialog, app } = require("electron");
+const { dialog } = require("electron");
 
 const getConfig = () => {
   // const configPath = path.join(app.getPath("userData"), "config.json");
@@ -17,10 +17,7 @@ const getConfig = () => {
 
   try {
     const data = fs.readFileSync(configPath, "utf8");
-    config = JSON.parse(data);
-
-    console.log("Configuration file loaded:", configPath); // debug, remove later
-    return config;
+    return JSON.parse(data);
   } catch (err) {
     dialog.showErrorBox(
       "Invalid Configuration File",
@@ -30,4 +27,18 @@ const getConfig = () => {
   }
 };
 
-module.exports = getConfig;
+const setConfig = (obj) => {
+  const configPath = path.join(__dirname, "../../config.json");
+  const config = getConfig();
+  const newConfig = { ...config, ...obj };
+
+  try {
+    fs.writeFileSync(configPath, JSON.stringify(newConfig), "utf8");
+    return true;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
+
+module.exports = { getConfig, setConfig };

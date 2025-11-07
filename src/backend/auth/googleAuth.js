@@ -98,7 +98,6 @@ const exchangeCodeForTokens = async (code) => {
   });
 
   const data = await res.json();
-  console.log("Token exchange response:", data); // log for debugging
 
   if (!res.ok || !data.access_token) {
     throw new Error(`Token exchange failed: ${res.error || res.statusText}`);

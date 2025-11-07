@@ -1,5 +1,6 @@
 const { google } = require("googleapis");
 const fs = require("fs");
+const { dialog } = require("electron");
 
 const { refreshAccessToken } = require("./auth/googleAuth.js");
 
@@ -15,7 +16,18 @@ class Upload {
    * @param {string | number} totalSize Total size of video in megabytes
    * @param {string} playlist Playlist the video should be added to
    */
-  constructor(uuid, filePath, filename, title, duration, totalSize, playlist, tokens) {
+  constructor(
+    uuid,
+    filePath,
+    filename,
+    title,
+    duration,
+    totalSize,
+    playlist,
+    tokens,
+    win,
+    showCompletionPopup = true
+  ) {
     this.filePath = filePath;
     this.uuid = uuid;
     this.filename = filename;
@@ -24,6 +36,8 @@ class Upload {
     this.totalSize = totalSize;
     this.playlist = playlist;
     this.tokens = tokens;
+    this.win = win; // window
+    this.showCompletionPopup = showCompletionPopup;
 
     this.status = "init"; // Possible values: "init", "auth", "upload", "process", "complete", "fail", "cancel"
     this.sizeDone = 0;
@@ -125,10 +139,29 @@ class Upload {
       this.percentDone = 100;
       this.sizeDone = this.totalSize * 1024 * 1024;
       this.#emit(progressCallback);
+
+      if (this.showCompletionPopup) {
+        await dialog.showMessageBox(this.win, {
+          message: `The video "${this.title}" has been successfully uploaded!`,
+          type: "info",
+          buttons: ["OK"],
+          title: "Successful Upload",
+        });
+      }
     } catch (err) {
       this.status = "fail";
       this.#emit(progressCallback);
-      console.error("Upload failed:", err);
+
+      dialog.showErrorBox(
+        "Failed to Upload Video",
+        `An error occurred while uploading the video "${
+          this.title
+        }". The console has more detailed error information that can be reported to the developer if necessary.\n\nError message: ${
+          err.message || "N/A"
+        }`
+      );
+      console.log(`Uploading the video ${this.title} with UUID of ${this.uuid} has failed!`);
+      console.log(err);
     }
   }
 }

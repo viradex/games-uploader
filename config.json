@@ -1,6 +1,6 @@
 {
   "defaultDirectory": "",
-  "muteFinishPopups": false,
+  "showCompletionPopup": false,
   "shutdownOnComplete": false,
   "playlists": {
     "2025/11": "PLv6sd2Q-SX137Q9TOK757GHBEX45PCQw1",
