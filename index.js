@@ -43,7 +43,7 @@ app.whenReady().then(async () => {
     win.webContents.on("did-finish-load", () => {
       win.webContents.send("update-checkboxes", {
         showCompletionPopup: config.showCompletionPopup,
-        shutdownOnComplete: config.shutdownOnComplete,
+        shutDownOnComplete: config.shutDownOnComplete,
       });
     });
   } catch (err) {

@@ -10,7 +10,7 @@ The `config.json` file is required for the app to run and follows this syntax:
 {
   "defaultDirectory": "",
   "showCompletionPopup": false,
-  "shutdownOnComplete": false,
+  "shutDownOnComplete": false,
   "playlists": {
     "2025/11": "PLExamplePlaylistID202511",
     "2025/12": "PLExamplePlaylistID202512",
@@ -30,9 +30,9 @@ Double backslashes are required if using backslashes in the path (e.g. `C:\\Data
 This setting can be modified in the UI.
 
 If `showCompletionPopup` is `true`, a message box will be shown every time an upload completes.
-If `shutdownOnComplete` is `true`, the computer will automatically shutdown 60 seconds after the final video has been uploaded.
+If `shutDownOnComplete` is `true`, the computer will automatically shut down 60 seconds after the final video has been uploaded.
 
-If the shutdown on complete option is set to `true`, the show completion popups option will be set to `true` regardless of the value entered.
+If the shut down on complete option is set to `true`, the show completion popups option will be set to `true` regardless of the value entered.
 
 ### Playlists
 

@@ -4,7 +4,7 @@ const uploadBtn = document.getElementById("uploadBtn");
 const uploadContainer = document.getElementById("uploadContainer");
 
 const completionPopupChk = document.getElementById("showCompletionPopup");
-const shutdownChk = document.getElementById("shutdownOnComplete");
+const shutDownChk = document.getElementById("shutDownOnComplete");
 
 uploadBtn.addEventListener("click", () => {
   window.electronAPI.selectVideo();
@@ -13,7 +13,7 @@ uploadBtn.addEventListener("click", () => {
 completionPopupChk.addEventListener("change", (e) => {
   window.electronAPI.updateConfig({ showCompletionPopup: e.target.checked });
 });
-shutdownChk.addEventListener("change", (e) => {
+shutDownChk.addEventListener("change", (e) => {
   if (e.target.checked) {
     completionPopupChk.checked = true;
     completionPopupChk.disabled = true;
@@ -23,16 +23,16 @@ shutdownChk.addEventListener("change", (e) => {
   }
 
   window.electronAPI.updateConfig({
-    shutdownOnComplete: e.target.checked,
+    shutDownOnComplete: e.target.checked,
     showCompletionPopup: true,
   });
 });
 
 window.electronAPI.onUpdateCheckboxes((states) => {
   completionPopupChk.checked = states.showCompletionPopup;
-  shutdownChk.checked = states.shutdownOnComplete;
+  shutDownChk.checked = states.shutDownOnComplete;
 
-  if (states.shutdownOnComplete) {
+  if (states.shutDownOnComplete) {
     completionPopupChk.checked = true;
     completionPopupChk.disabled = true;
   }
