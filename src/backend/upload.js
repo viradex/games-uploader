@@ -1,3 +1,6 @@
+const { google } = require("googleapis");
+const fs = require("fs");
+
 class Upload {
   /**
    * Initializes a single video Upload instance.
@@ -10,7 +13,7 @@ class Upload {
    * @param {string | number} totalSize Total size of video in megabytes
    * @param {string} playlist Playlist the video should be added to
    */
-  constructor(uuid, filePath, filename, title, duration, totalSize, playlist) {
+  constructor(uuid, filePath, filename, title, duration, totalSize, playlist, tokens) {
     this.filePath = filePath;
     this.uuid = uuid;
     this.filename = filename;
@@ -18,6 +21,7 @@ class Upload {
     this.duration = duration;
     this.totalSize = totalSize;
     this.playlist = playlist;
+    this.tokens = tokens;
 
     this.status = "init"; // Possible values: "init", "auth", "upload", "process", "complete", "fail", "cancel"
     this.sizeDone = 0;
@@ -25,48 +29,106 @@ class Upload {
     this.abortController = null;
   }
 
+  #emit(progressCallback, overrides = {}) {
+    progressCallback({
+      uuid: this.uuid,
+      status: this.status,
+      percentDone: this.percentDone,
+      sizeDone: this.sizeDone / (1024 * 1024),
+      totalSize: this.totalSize,
+      speed: overrides.speed ?? 0,
+      ...overrides,
+    });
+  }
+
+  #initOAuth() {
+    const oauth2Client = new google.auth.OAuth2(
+      this.tokens.client_id,
+      this.tokens.client_secret,
+      this.tokens.redirect_uri
+    );
+
+    oauth2Client.setCredentials({
+      access_token: this.tokens.access_token,
+      refresh_token: this.tokens.refresh_token,
+      expiry_date: Date.now() + this.tokens.expires_in * 1000,
+    });
+
+    return google.youtube({ version: "v3", auth: oauth2Client });
+  }
+
+  #calculateProgress(uploadedBytes, startTime) {
+    const totalBytes = this.totalSize * 1024 * 1024;
+    this.sizeDone = uploadedBytes;
+    this.percentDone = Math.min(100, Math.round((uploadedBytes / totalBytes) * 100));
+
+    const elapsedSec = (Date.now() - startTime) / 1000;
+    const speedMB = elapsedSec > 0 ? uploadedBytes / elapsedSec / (1024 * 1024) : 0;
+
+    return speedMB;
+  }
+
   async startUpload(progressCallback) {
-    this.status = "upload";
-    const total = parseFloat(this.totalSize);
+    try {
+      this.status = "auth";
+      this.#emit(progressCallback);
 
-    const startTime = Date.now();
+      const youtube = this.#initOAuth();
+      await youtube.channels.list({ part: "snippet", mine: true });
 
-    const interval = setInterval(() => {
-      if (this.sizeDone >= total) {
-        this.sizeDone = total;
-        this.percentDone = 100;
-        this.status = "complete";
+      this.status = "upload";
+      this.#emit(progressCallback);
 
-        progressCallback({
-          uuid: this.uuid,
-          status: this.status,
-          percentDone: this.percentDone,
-          sizeDone: this.sizeDone,
-          totalSize: total,
-          speed: (total / ((Date.now() - startTime) / 1000)).toFixed(2),
-          status: this.status,
+      let uploadedBytes = 0;
+      const start = Date.now();
+      this.abortController = new AbortController();
+
+      const res = await youtube.videos.insert(
+        {
+          part: "snippet,status",
+          requestBody: {
+            snippet: { title: this.title },
+            status: { privacyStatus: "private", selfDeclaredMadeForKids: false },
+          },
+          media: { body: fs.createReadStream(this.filePath) },
+        },
+        {
+          signal: this.abortController.signal,
+          onUploadProgress: (evt) => {
+            uploadedBytes = evt.bytesRead;
+            const speed = this.#calculateProgress(uploadedBytes, start);
+            this.#emit(progressCallback, { speed });
+          },
+        }
+      );
+
+      this.status = "process";
+      this.#emit(progressCallback);
+
+      const videoId = res.data.id;
+      console.log(`Uploaded video: ${videoId}`);
+
+      if (this.playlist) {
+        await youtube.playlistItems.insert({
+          part: "snippet",
+          requestBody: {
+            snippet: {
+              playlistId: this.playlist,
+              resourceId: { kind: "youtube#video", videoId },
+            },
+          },
         });
-
-        clearInterval(interval);
-        return;
       }
 
-      const increment = total / 100;
-      this.sizeDone += increment;
-      this.percentDone = (this.sizeDone / total) * 100;
-
-      const elapsedTime = (Date.now() - startTime) / 1000;
-      const speed = this.sizeDone / elapsedTime;
-
-      progressCallback({
-        uuid: this.uuid,
-        percentDone: parseFloat(this.percentDone.toFixed(2)),
-        sizeDone: parseFloat(this.sizeDone.toFixed(2)),
-        totalSize: total,
-        speed,
-        status: this.status,
-      });
-    }, 100);
+      this.status = "complete";
+      this.percentDone = 100;
+      this.sizeDone = this.totalSize * 1024 * 1024;
+      this.#emit(progressCallback);
+    } catch (err) {
+      this.status = "fail";
+      this.#emit(progressCallback);
+      console.error("Upload failed:", err);
+    }
   }
 }
 

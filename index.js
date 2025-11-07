@@ -38,6 +38,7 @@ app.whenReady().then(async () => {
     createWindow();
 
     tokens = await getTokens(win);
+    console.log(tokens);
     console.log("YouTube tokens obtained successfully!");
   } catch (err) {
     console.log("An unexpected error occurred! Please report this to the developer:");
@@ -69,7 +70,8 @@ ipcMain.on("start-upload", async (event, details) => {
     details.title,
     details.duration,
     details.totalSize,
-    details.playlist
+    details.playlist,
+    tokens
   );
 
   uploads.set(details.uuid, uploadInstance);
