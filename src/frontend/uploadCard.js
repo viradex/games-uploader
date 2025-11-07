@@ -35,15 +35,43 @@ const addUploadCard = (upload, container) => {
   window.electronAPI.startUpload(upload);
 };
 
-const updateCard = async (uuid, percentDone, sizeDone, totalSize, speed) => {
+const updateCard = async (uuid, status, percentDone, sizeDone, totalSize, speed) => {
   const card = document.getElementById(uuid);
 
   const progressBar = card.querySelector(".uploadProgressBar");
-  const status = card.querySelector(".uploadStatus");
+  const statusDiv = card.querySelector(".uploadStatus");
   const sizeText = card.querySelector(".uploadSize");
 
+  let statusText = "";
+  switch (status) {
+    case "init":
+      statusText = "Initializing...";
+      break;
+    case "auth":
+      statusText = "Authorizing...";
+      break;
+    case "upload":
+      statusText = `Uploading... (${percentDone}%)`;
+      break;
+    case "process":
+      statusText = "Processing on YouTube...";
+      break;
+    case "complete":
+      statusText = "Completed upload!";
+      break;
+    case "fail":
+      statusText = "Upload failed";
+      break;
+    case "cancel":
+      statusText = "Cancelled upload";
+      break;
+    default:
+      statusText = "Unknown status";
+      break;
+  }
+
   progressBar.style.width = `${percentDone}%`;
-  status.textContent = percentDone < 100 ? `Uploading... (${percentDone}%)` : "Completed!";
+  statusDiv.textContent = statusText;
   sizeText.textContent = `${sizeDone.toFixed(2)} MB / ${totalSize} MB (${speed.toFixed(2)} MB/s)`;
 };
 

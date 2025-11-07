@@ -14,6 +14,6 @@ window.electronAPI.onVideoDetails((details) => {
 });
 
 window.electronAPI.onUploadProgress((details) => {
-  const { uuid, percentDone, sizeDone, totalSize, speed } = details;
-  updateCard(uuid, percentDone, sizeDone, totalSize, speed);
+  const { uuid, status, percentDone, sizeDone, totalSize, speed } = details;
+  updateCard(uuid, status, percentDone, sizeDone, totalSize, speed);
 });

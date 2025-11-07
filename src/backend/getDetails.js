@@ -12,11 +12,12 @@ const parseVideoTitle = (filename) => {
   // Case 1: Video from Medal.tv
   if (filename.startsWith("MedalTV")) {
     const rest = filename.slice(7); // Remove "MedalTV"
-    const gameMatch = rest.match(/^([A-Za-z]+)(\d{14})$/);
+    const gameMatch = rest.match(/^([A-Za-z]+)(\d{14})(\d{3})?$/);
 
     if (gameMatch) {
       const game = gameMatch[1];
       const dateStr = gameMatch[2];
+
       const formattedDate = `${dateStr.slice(0, 4)}/${dateStr.slice(4, 6)}/${dateStr.slice(
         6,
         8

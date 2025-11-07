@@ -39,6 +39,7 @@ class Upload {
 
         progressCallback({
           uuid: this.uuid,
+          status: this.status,
           percentDone: this.percentDone,
           sizeDone: this.sizeDone,
           totalSize: total,
