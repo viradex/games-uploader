@@ -1,8 +1,24 @@
+/**
+ * Creates a UI card for a new video upload.
+ *
+ * Displays the following information:
+ * - Title
+ * - Duration
+ * - Filename
+ * - Progress
+ * - Speed
+ * - Status
+ *
+ * @param {Object} upload The details of the upload
+ * @param {HTMLDivElement} container The main upload container
+ */
 const addUploadCard = (upload, container) => {
+  // Creates new base card, applying class and UUID
   const card = document.createElement("div");
   card.classList.add("uploadCard");
   card.id = upload.uuid;
 
+  // Adds the three main sections of the card: header, progress, and footer
   card.innerHTML = `
     <div class="uploadHeader">
       <div class="uploadTitle">
@@ -26,15 +42,29 @@ const addUploadCard = (upload, container) => {
     </div>
   `;
 
+  // Deletion functionality
   const deleteBtn = card.querySelector(".deleteBtn");
   deleteBtn.addEventListener("click", async () => {
     await removeUploadCard(upload.uuid, true);
   });
 
+  // Adds the card to the UI and queue
   container.appendChild(card);
   window.electronAPI.startUpload(upload);
 };
 
+/**
+ * Updates visual elements of an existing upload card in the UI, mainly reflecting progress, status, and speed.
+ *
+ * Use `addUploadCard()` to make the new element.
+ *
+ * @param {string} uuid UUID to find the upload card
+ * @param {string} status Current upload status
+ * @param {string | number} percentDone Percentage of upload completed
+ * @param {string | number} sizeDone Size uploaded currently
+ * @param {string | number} totalSize Total size of upload
+ * @param {string | number} speed Speed in MB/s of upload
+ */
 const updateCard = async (uuid, status, percentDone, sizeDone, totalSize, speed) => {
   const card = document.getElementById(uuid);
 
@@ -42,6 +72,7 @@ const updateCard = async (uuid, status, percentDone, sizeDone, totalSize, speed)
   const statusDiv = card.querySelector(".uploadStatus");
   const sizeText = card.querySelector(".uploadSize");
 
+  // Maps status to text for UI
   let statusText = "";
   switch (status) {
     case "queue":
@@ -73,11 +104,18 @@ const updateCard = async (uuid, status, percentDone, sizeDone, totalSize, speed)
       break;
   }
 
+  // Updates progress and speed to UI
   progressBar.style.width = `${percentDone}%`;
   statusDiv.textContent = statusText;
   sizeText.textContent = `${sizeDone.toFixed(2)} MB / ${totalSize} MB (${speed.toFixed(2)} MB/s)`;
 };
 
+/**
+ * Removes an upload card from the UI and can optionally cancel an upload if called manually.
+ *
+ * @param {string} uuid UUID to find the upload card
+ * @param {boolean} manuallyCalled Whether or not the function was called due to the user pressing the Cancel button
+ */
 const removeUploadCard = async (uuid, manuallyCalled) => {
   const card = document.getElementById(uuid);
   if (card) {
@@ -90,10 +128,12 @@ const removeUploadCard = async (uuid, manuallyCalled) => {
       });
 
       if (result.response === 0) {
+        // Remove from DOM and cancel upload from backend
         card.remove();
         window.electronAPI.cancelUpload(uuid);
       }
     } else {
+      // Remove from DOM
       card.remove();
     }
   }

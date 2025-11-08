@@ -4,7 +4,7 @@ Uploads clips of games from Medal.tv or other screen recorders!
 
 ## How to get `client_secrets.json`
 
-This app requires the client_secrets.json file to run. Follow these steps to get the file!
+This app requires the `client_secrets.json` file to run. Follow these steps to get the file!
 
 1. Open [Google Cloud Console](https://console.cloud.google.com/) and sign in with the Google account that you want to upload videos to.
 2. Go to Select Project → New Project. Give the app a name and click Create.
@@ -24,7 +24,7 @@ You can use this content below to populate the file and modify it to your config
 {
   "clientSecretsPath": "C:\\Data\\client_secrets.json",
   "defaultDirectory": "",
-  "showCompletionPopup": false,
+  "showCompletionNotification": false,
   "shutDownOnComplete": false,
   "playlists": {
     "2025/11": "PLExamplePlaylistID202511",
@@ -52,7 +52,7 @@ Double backslashes are required if using backslashes in the path (e.g. `C:\\Data
 
 This setting can be modified in the UI.
 
-If `showCompletionPopup` is `true`, a message box will be shown every time an upload completes.
+If `showCompletionNotification` is `true`, a message box will be shown every time an upload completes.
 If `shutDownOnComplete` is `true`, the computer will automatically shut down 60 seconds after the final video has been uploaded.
 
 If the shut down on complete option is set to `true`, the show completion popups option will be set to `true` regardless of the value entered.

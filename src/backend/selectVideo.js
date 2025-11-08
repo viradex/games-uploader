@@ -1,27 +1,19 @@
-const { dialog } = require("electron");
+const { selectVideos } = require("./utils.js");
+const getDetails = require("./getDetails.js");
 
-const { getConfig } = require("../backend/config.js");
-const getDetails = require("../backend/getDetails.js");
-
-const selectVideo = async () => {
-  const defaultPath = getConfig().defaultDirectory || "";
-
-  const files = await dialog.showOpenDialog({
-    title: "Choose videos to upload",
-    defaultPath,
-    buttonLabel: "Upload",
-    filters: [{ name: "Videos", extensions: ["mp4", "mov", "avi", "mkv"] }],
-    properties: ["openFile", "multiSelections"],
-  });
-
-  if (files.canceled || !files.filePaths.length) return [];
-  else return files.filePaths;
-};
-
+/**
+ * Gathers information about multiple videos and sends to UI.
+ *
+ * @param {any} win Main BrowserWindow instance
+ * @param {Object} config Configuration object
+ * @param {string[]} videos Optionally, a list of pre-selected videos. If not provided, requests the user for videos
+ */
 const getVideoDetails = async (win, config, videos = []) => {
+  // Gets videos if none were passed
   if (!videos.length) {
-    videos = await selectVideo();
+    videos = await selectVideos("Select videos to upload", "Upload");
   }
+
   const details = [];
 
   // Use for..of instead of forEach due to async functions
@@ -30,8 +22,9 @@ const getVideoDetails = async (win, config, videos = []) => {
     details.push(info);
   }
 
+  // If any videos were processed, send details to renderer
   if (!details.length) return;
   win.webContents.send("video-details", details);
 };
 
-module.exports = { selectVideo, getVideoDetails };
+module.exports = getVideoDetails;
