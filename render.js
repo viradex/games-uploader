@@ -21,7 +21,7 @@ shutDownChk.addEventListener("change", (e) => {
 
   window.electronAPI.updateConfig({
     shutDownOnComplete: e.target.checked,
-    showCompletionNotification: true,
+    showCompletionNotification: e.target.checked,
   });
 });
 
