@@ -95,12 +95,14 @@ const _shutDownOnDifferentOS = () => {
  * @returns
  */
 const shutDownComputer = async (win, seconds = 60) => {
+  let canceled = false;
+
   dialog
     .showMessageBox(win, {
       type: "warning",
       title: "Shutting Down Computer",
       message: `Computer will shut down in ${seconds} seconds`,
-      detail: `All uploads have been completed, and the computer will shut down in ${seconds} seconds.\n\nPress OK to shut down immediately, or Cancel to abort shutdown`,
+      detail: `All uploads have been completed, and the computer will shut down in ${seconds} seconds.\n\nPress OK to shut down immediately, or Cancel to abort shutdown.`,
       buttons: ["OK", "Cancel"],
       defaultId: 1,
     })
@@ -108,15 +110,17 @@ const shutDownComputer = async (win, seconds = 60) => {
       if (result.response === 0) {
         // OK clicked
         _shutDownOnDifferentOS();
+      } else {
+        canceled = true;
       }
     });
 
-  // Cancel clicked
-  if (result.response === 1) return;
-
-  // If user clicks nothing, wait certain delay before shutting down
+  // Wait certain delay before shutting down
   await sleep(seconds * 1000);
-  _shutDownOnDifferentOS();
+
+  if (!canceled) {
+    _shutDownOnDifferentOS();
+  }
 };
 
 module.exports = { sleep, selectVideos, confirmCloseApp, shutDownComputer };
