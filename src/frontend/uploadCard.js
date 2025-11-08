@@ -38,7 +38,7 @@ const addUploadCard = (upload, container) => {
 
     <div class="uploadFooter">
       <div class="uploadStatus">Initializing...</div>
-      <div class="uploadSize">0 MB / ${upload.totalSize} MB (0 MB/s)</div>
+      <div class="uploadSize">0 MB / ${Math.round(parseFloat(upload.totalSize))} MB (0 MB/s)</div>
     </div>
   `;
 
@@ -107,7 +107,9 @@ const updateCard = async (uuid, status, percentDone, sizeDone, totalSize, speed)
   // Updates progress and speed to UI
   progressBar.style.width = `${percentDone}%`;
   statusDiv.textContent = statusText;
-  sizeText.textContent = `${sizeDone.toFixed(2)} MB / ${totalSize} MB (${speed.toFixed(2)} MB/s)`;
+  sizeText.textContent = `${Math.round(sizeDone)} MB / ${Math.round(totalSize)} MB (${speed.toFixed(
+    2
+  )} MB/s)`;
 };
 
 /**

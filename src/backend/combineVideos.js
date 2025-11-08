@@ -122,7 +122,7 @@ const combineVideos = async (win) => {
   });
 
   if (uploadConfirm.response === 0) {
-    await getVideoDetails(win, getConfig(), [sortedFiles[0]]);
+    await getVideoDetails(win, [sortedFiles[0]]);
   }
 };
 

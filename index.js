@@ -5,7 +5,7 @@ const { getConfig, setConfig } = require("./src/backend/config.js");
 const { createAppMenu, updateCancelMenuItems } = require("./src/backend/menu.js");
 const getVideoDetails = require("./src/backend/selectVideo.js");
 const { getTokens, getClientSecrets } = require("./src/backend/auth/googleAuth.js");
-const { confirmCloseApp, shutDownComputer } = require("./src/backend/utils.js");
+const { videoExists, confirmCloseApp, shutDownComputer } = require("./src/backend/utils.js");
 const Upload = require("./src/backend/upload.js");
 const QueueManager = require("./src/backend/queue.js");
 
@@ -110,10 +110,16 @@ app.whenReady().then(async () => {
 
 // UI sends request to upload video
 ipcMain.on("select-video", async (event) => {
-  getVideoDetails(win, config);
+  getVideoDetails(win);
 });
 
 ipcMain.on("start-upload", async (event, details) => {
+  const exists = await videoExists(tokens, details.title, win, 50);
+  if (exists) {
+    win.webContents.send("remove-upload", details.uuid);
+    return;
+  }
+
   // Creates new instance of Upload
   const uploadInstance = new Upload(
     details.uuid,

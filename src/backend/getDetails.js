@@ -4,6 +4,8 @@ const { execFile } = require("child_process");
 const crypto = require("crypto");
 const ffmpegPath = require("ffmpeg-static");
 
+const { getConfig } = require("./config.js");
+
 /**
  * Receives a video filename and attempts to convert it into a clean, readable title.
  *
@@ -156,17 +158,16 @@ const getPlaylist = (title, config) => {
  * - Playlist ID
  *
  * @param {string} videoPath Path to video to get the details of
- * @param {Object} config Configuration file object
  * @returns {{videoPath: string, uuid: string, filename: string, title: string, duration: string, totalSize: string, playlist: string }} Retrieved details of file
  */
-const getDetails = async (videoPath, config) => {
+const getDetails = async (videoPath) => {
   const uuid = crypto.randomUUID(); // For identifying different upload cards from each other
   const filename = path.basename(videoPath);
   const title = parseVideoTitle(filename);
 
   const duration = await getVideoDuration(videoPath);
   const totalSize = await getSize(videoPath);
-  const playlist = getPlaylist(title, config);
+  const playlist = getPlaylist(title, getConfig());
 
   return {
     videoPath,

@@ -2,7 +2,6 @@ const { Menu, dialog, shell } = require("electron");
 const path = require("path");
 
 const combineVideos = require("./combineVideos.js");
-const { getConfig } = require("../backend/config.js");
 const getVideoDetails = require("./selectVideo.js");
 
 /**
@@ -49,7 +48,7 @@ const createAppMenu = (win, queueManager) => {
           label: "Upload Videos",
           click: async () => {
             // Opens file selection and starts upload process
-            await getVideoDetails(win, getConfig());
+            await getVideoDetails(win);
           },
         },
         {

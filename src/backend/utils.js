@@ -1,6 +1,8 @@
 const { dialog } = require("electron");
 const { exec } = require("child_process");
+const { google } = require("googleapis");
 
+const { refreshAccessToken } = require("./auth/googleAuth.js");
 const { getConfig } = require("./config.js");
 
 /**
@@ -36,6 +38,80 @@ const selectVideos = async (title, buttonName = "OK") => {
   // If prompt was canceled or no files were selected, return empty array
   if (files.canceled || !files.filePaths.length) return [];
   else return files.filePaths;
+};
+
+/**
+ * Checks if the YouTube video title already exists.
+ * Only checks the last amount of uploads as defined in `limit`
+ * to prevent mass API requests and reaching quota.
+ *
+ * Returns the following values if any of the following cases occur:
+ * - If the video does not exist, returns `false`
+ * - If the video exists, but the user wishes to proceed, returns `false`
+ * - If the video exists and the user wishes to cancel the upload, returns `true`
+ *
+ * @param {Object} tokens The OAuth tokens object
+ * @param {string} title Title to check
+ * @param {any} win The main BrowserWindow
+ * @param {number} limit Maximum number of recent videos to check (default 50)
+ * @returns {Promise<boolean>} See conditions above.
+ */
+const videoExists = async (tokens, title, win, limit = 50) => {
+  try {
+    // Refresh tokens if it doesn't exist or expired
+    if (!tokens.access_token || Date.now() > tokens.expiry_date) {
+      tokens = await refreshAccessToken(tokens);
+    }
+
+    // Set up credentials for YouTube API
+    const oauth2Client = new google.auth.OAuth2(
+      tokens.client_id,
+      tokens.client_secret,
+      tokens.redirect_uri
+    );
+    oauth2Client.setCredentials(tokens);
+
+    const youtube = google.youtube({ version: "v3", auth: oauth2Client });
+
+    // Fetch last few uploads as defined in 'limit' from the channel
+    const res = await youtube.search.list({
+      part: "snippet",
+      forMine: true,
+      type: "video",
+      maxResults: limit,
+      order: "date",
+    });
+
+    // Checks if the video title already exists
+    const videos = res.data.items || [];
+    const exists = videos.some((v) => v.snippet.title === title);
+
+    if (exists) {
+      const result = await dialog.showMessageBox(win, {
+        type: "warning",
+        title: "Video Already Exists",
+        message: `A video on your YouTube channel was found with the same title of "${title}". Are you sure you want to proceed with the upload?\n\nUploading this video won't overwrite your previous one.`,
+        buttons: ["OK", "Cancel"],
+        defaultId: 1,
+      });
+
+      // Returns 'false' if OK was selected
+      return result.response === 1;
+    } else return false;
+  } catch (err) {
+    // Catch API errors
+    dialog.showMessageBox(this.win, {
+      type: "error",
+      title: "Failed to Check if Video Exists",
+      message: `An error occurred while checking if the provided video already existed. The console has more detailed error information that can be reported to the developer if necessary.\n\nError message: ${
+        err.message || "N/A"
+      }`,
+      buttons: ["OK"],
+    });
+
+    console.log(`Checking if ${title} existed has failed!`);
+    console.log(err);
+  }
 };
 
 /**
@@ -123,4 +199,4 @@ const shutDownComputer = async (win, seconds = 60) => {
   }
 };
 
-module.exports = { sleep, selectVideos, confirmCloseApp, shutDownComputer };
+module.exports = { sleep, selectVideos, videoExists, confirmCloseApp, shutDownComputer };
