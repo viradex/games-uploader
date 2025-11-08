@@ -50,9 +50,6 @@ const parseVideoTitle = (filename) => {
 const getVideoDuration = (filePath) => {
   return new Promise((resolve, reject) => {
     execFile(ffmpegPath, ["-i", filePath], (err, stdout, stderr) => {
-      // Converts to seconds
-      // TODO This isn't really necessary, it's more compatibility for formatDuration()
-      // It can be slightly changed but doesn't need to be converted to secs and back
       const match = stderr.match(/Duration: (\d{2}):(\d{2}):(\d{2}\.\d+)/);
 
       if (match) {
@@ -60,23 +57,17 @@ const getVideoDuration = (filePath) => {
         const minutes = parseInt(match[2]);
         const seconds = parseFloat(match[3]);
 
-        resolve(hours * 3600 + minutes * 60 + seconds);
+        // Directly format into string without converting to seconds
+        const hh = hours;
+        const mm = String(minutes).padStart(2, "0");
+        const ss = String(Math.floor(seconds)).padStart(2, "0");
+
+        resolve(hours > 0 ? `${hh}:${mm}:${ss}` : `${mm}:${ss}`);
       } else {
         reject(new Error("Could not parse duration"));
       }
     });
   });
-};
-
-const formatDuration = (seconds) => {
-  seconds = Math.floor(seconds);
-
-  const hours = Math.floor(seconds / 3600);
-  const minutes = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
-  const finalSeconds = String(seconds % 60).padStart(2, "0");
-
-  if (hours > 0) return `${hours}:${minutes}:${finalSeconds}`;
-  else return `${minutes}:${finalSeconds}`;
 };
 
 const getSize = async (filePath) => {
@@ -96,10 +87,6 @@ const getPlaylist = (title, config) => {
     }
   }
 
-  if (!playlistID) {
-    playlistID = playlists["default"];
-  }
-
   return playlistID;
 };
 
@@ -108,8 +95,7 @@ const getDetails = async (videoPath, config) => {
   const filename = path.basename(videoPath);
   const title = parseVideoTitle(filename);
 
-  const durationSecs = await getVideoDuration(videoPath);
-  const duration = formatDuration(durationSecs);
+  const duration = await getVideoDuration(videoPath);
 
   const totalSize = await getSize(videoPath);
 

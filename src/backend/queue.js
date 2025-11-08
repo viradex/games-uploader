@@ -39,7 +39,7 @@ class QueueManager {
         this.win.webContents.send("upload-progress", progress);
       });
     } catch (err) {
-      console.log(`Upload failed for video ${this.current.title} with UUID ${this.current.uuid}`);
+      console.log(`Upload failed for video "${this.current.title}" with UUID ${this.current.uuid}`);
       console.log(err);
     } finally {
       if (this.current) {

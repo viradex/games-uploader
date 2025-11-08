@@ -14,13 +14,8 @@ completionPopupChk.addEventListener("change", (e) => {
   window.electronAPI.updateConfig({ showCompletionPopup: e.target.checked });
 });
 shutDownChk.addEventListener("change", (e) => {
-  if (e.target.checked) {
-    completionPopupChk.checked = true;
-    completionPopupChk.disabled = true;
-  } else {
-    completionPopupChk.checked = true;
-    completionPopupChk.disabled = false;
-  }
+  completionPopupChk.checked = e.target.checked;
+  completionPopupChk.disabled = e.target.checked;
 
   window.electronAPI.updateConfig({
     shutDownOnComplete: e.target.checked,

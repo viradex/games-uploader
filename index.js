@@ -5,7 +5,7 @@ const { getConfig, setConfig } = require("./src/backend/config.js");
 const { createAppMenu, updateCancelMenuItems } = require("./src/backend/menu.js");
 const { getVideoDetails } = require("./src/backend/selectVideo.js");
 const { getTokens, getClientSecrets } = require("./src/backend/auth/googleAuth.js");
-const { confirmCloseApp } = require("./src/utils.js");
+const { confirmCloseApp, shutDownComputer } = require("./src/backend/utils.js");
 const Upload = require("./src/backend/upload.js");
 const QueueManager = require("./src/backend/queue.js");
 
@@ -39,6 +39,10 @@ const createWindow = () => {
 
   queueManager = new QueueManager(win, uploads, (queue, current) => {
     updateCancelMenuItems(queueManager, queue, current);
+
+    if (!current && !queue.length) {
+      shutDownComputer(win, 60);
+    }
   });
   createAppMenu(win, queueManager);
 };
@@ -50,7 +54,6 @@ app.whenReady().then(async () => {
 
     tokens = await getTokens(win);
     clientSecrets = getClientSecrets();
-    console.log("YouTube tokens obtained successfully!");
 
     win.webContents.on("did-finish-load", () => {
       win.webContents.send("update-checkboxes", {
@@ -59,7 +62,7 @@ app.whenReady().then(async () => {
       });
     });
   } catch (err) {
-    console.log("An unexpected error occurred! Please report this to the developer:");
+    console.log("An unexpected error occurred!");
     console.log(err);
     app.quit();
   }
@@ -86,7 +89,6 @@ ipcMain.on("start-upload", async (event, details) => {
 
   uploads.set(details.uuid, uploadInstance);
   queueManager.add(uploadInstance);
-  console.log(`Upload queued for ${details.title} with UUID ${details.uuid}`);
 });
 
 ipcMain.on("cancel-upload", async (event, uuid) => {

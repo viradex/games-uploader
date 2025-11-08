@@ -3,7 +3,7 @@ const fs = require("fs");
 const { dialog } = require("electron");
 
 const { refreshAccessToken } = require("./auth/googleAuth.js");
-const { sleep } = require("../utils.js");
+const { sleep } = require("./utils.js");
 
 class Upload {
   /**
@@ -124,7 +124,6 @@ class Upload {
       this.#emit(progressCallback);
 
       const videoId = res.data.id;
-      console.log(`Uploaded video: ${videoId}`);
 
       if (this.playlist) {
         await youtube.playlistItems.insert({
@@ -160,8 +159,6 @@ class Upload {
         // not really clean check
         this.status = "cancel";
         this.#emit(progressCallback);
-
-        console.log(`Upload aborted by user: "${this.title}" with UUID ${this.uuid}`);
       } else {
         this.status = "fail";
         this.#emit(progressCallback);

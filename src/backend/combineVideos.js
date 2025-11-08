@@ -69,7 +69,7 @@ const concatVideos = async (fileListPath, outputPath) => {
 
 const _handleErrorFS = (err) => {
   if (err) {
-    console.log("Error with", file);
+    console.log("An error occurred while using the file system!");
     console.log(err);
   }
 };
@@ -116,7 +116,6 @@ const combineVideos = async (win) => {
     type: "info",
     buttons: ["OK", "Cancel"],
     defaultId: 1,
-    cancelId: 1,
   });
 
   if (uploadConfirm.response === 0) {

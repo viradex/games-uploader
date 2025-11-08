@@ -12,7 +12,7 @@ const userEnteredSecretsPath = getConfig().clientSecretsPath;
 const REDIRECT_PORT = 52719;
 const REDIRECT_URI = `http://127.0.0.1:${REDIRECT_PORT}`;
 const TOKEN_PATH = path.join(userDataPath, "token.json");
-const CLIENT_SECRETS_PATH = path.join(process.cwd(), userEnteredSecretsPath); // temp TODO see if it works when built
+const CLIENT_SECRETS_PATH = path.join(process.cwd(), userEnteredSecretsPath);
 
 const startOAuthFlow = async () => {
   const creds = JSON.parse(fs.readFileSync(CLIENT_SECRETS_PATH, "utf8")).installed;
