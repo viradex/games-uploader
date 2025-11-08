@@ -1,5 +1,5 @@
 const { dialog } = require("electron");
-const fs = require("fs");
+const fs = require("fs").promises;
 const { execFile } = require("child_process");
 const path = require("path");
 const ffmpegPath = require("ffmpeg-static");
@@ -63,18 +63,6 @@ const concatVideos = async (fileListPath, outputPath) => {
 };
 
 /**
- * Function to handle repetitiveness of `fs` callbacks.
- *
- * @param {any} err Error
- */
-const _handleErrorFS = (err) => {
-  if (err) {
-    console.log("An error occurred while using the file system!");
-    console.log(err);
-  }
-};
-
-/**
  * Complete workflow for selecting, sorting, combining, and optionally starting an upload for multiple videos.
  *
  * @param {any} win Instance of BrowserWindow for dialogs
@@ -104,23 +92,23 @@ const combineVideos = async (win) => {
   const fileListPath = path.join(videosFolder, "file_list.txt");
 
   // Add each video file to a temporary text file for FFmpeg
-  sortedFiles.forEach((file) => {
+  for (const file of sortedFiles) {
     const text = `file '${file}'\n`;
-    fs.appendFile(fileListPath, text, _handleErrorFS);
-  });
+    await fs.appendFile(fileListPath, text);
+  }
 
   // Final combined file name and location for FFmpeg, and combine videos
   const combinedFile = path.join(videosFolder, "combined.mp4");
   await concatVideos(fileListPath, combinedFile);
 
   // Remove temporary text file and original videos
-  fs.rm(fileListPath, _handleErrorFS);
-  sortedFiles.forEach((file) => {
-    fs.rm(file, _handleErrorFS);
-  });
+  await fs.rm(fileListPath);
+  for (const file of sortedFiles) {
+    await fs.rm(file);
+  }
 
   // Rename combined video to oldest original video
-  fs.rename(combinedFile, sortedFiles[0], _handleErrorFS);
+  await fs.rename(combinedFile, sortedFiles[0]);
 
   // Confirm uploading the new combined video
   const uploadConfirm = await dialog.showMessageBox(win, {
