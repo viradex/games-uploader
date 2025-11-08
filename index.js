@@ -3,8 +3,7 @@ const path = require("path");
 
 const { getConfig, setConfig } = require("./src/backend/config.js");
 const createAppMenu = require("./src/backend/menu.js");
-const selectVideo = require("./src/backend/selectVideo.js");
-const getDetails = require("./src/backend/getDetails.js");
+const { getVideoDetails } = require("./src/backend/selectVideo.js");
 const { getTokens } = require("./src/backend/auth/googleAuth.js");
 const { confirmCloseApp } = require("./src/utils.js");
 const Upload = require("./src/backend/upload.js");
@@ -66,17 +65,7 @@ app.whenReady().then(async () => {
 });
 
 ipcMain.on("select-video", async (event) => {
-  const videos = await selectVideo();
-  const details = [];
-
-  // Use for..of instead of forEach due to async functions
-  for (const video of videos) {
-    const info = await getDetails(video, config);
-    details.push(info);
-  }
-
-  if (!details.length) return;
-  win.webContents.send("video-details", details);
+  getVideoDetails(win, config);
 });
 
 ipcMain.on("start-upload", async (event, details) => {

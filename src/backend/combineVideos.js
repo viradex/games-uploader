@@ -5,6 +5,7 @@ const path = require("path");
 const ffmpegPath = require("ffmpeg-static");
 
 const { getConfig } = require("./config.js");
+const { getVideoDetails } = require("./selectVideo.js");
 
 const fileSelection = async () => {
   const defaultPath = getConfig().defaultDirectory || "";
@@ -75,7 +76,7 @@ const _handleErrorFS = (err) => {
 
 const combineVideos = async (win) => {
   const files = await fileSelection();
-  if (!files) {
+  if (!files.length) {
     return;
   } else if (files.length === 1) {
     await dialog.showMessageBox(win, {
@@ -107,13 +108,20 @@ const combineVideos = async (win) => {
   });
 
   fs.rename(combinedFile, sortedFiles[0], _handleErrorFS);
-  await dialog.showMessageBox(win, {
-    message: `All videos were successfully combined into "${path.basename(sortedFiles[0])}"!`,
+  const uploadConfirm = await dialog.showMessageBox(win, {
+    message: `All videos were successfully combined into "${path.basename(
+      sortedFiles[0]
+    )}"!\n\nWould you like to upload this video to YouTube?`,
     title: "Successfully Combined Videos",
     type: "info",
-    buttons: ["OK"],
-    defaultId: 0,
+    buttons: ["OK", "Cancel"],
+    defaultId: 1,
+    cancelId: 1,
   });
+
+  if (uploadConfirm.response === 0) {
+    await getVideoDetails(win, getConfig(), [sortedFiles[0]]);
+  }
 };
 
 module.exports = combineVideos;
