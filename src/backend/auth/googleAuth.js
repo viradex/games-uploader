@@ -4,12 +4,15 @@ const http = require("http");
 const { app, shell, dialog } = require("electron");
 const { google } = require("googleapis");
 
+const { getConfig } = require("../config.js");
+
 const userDataPath = app.getPath("userData");
+const userEnteredSecretsPath = getConfig().clientSecretsPath;
 
 const REDIRECT_PORT = 52719;
 const REDIRECT_URI = `http://127.0.0.1:${REDIRECT_PORT}`;
 const TOKEN_PATH = path.join(userDataPath, "token.json");
-const CLIENT_SECRETS_PATH = path.join(__dirname, "client_secrets.json"); // temp TODO see if it works when built
+const CLIENT_SECRETS_PATH = path.join(process.cwd(), userEnteredSecretsPath); // temp TODO see if it works when built
 
 const startOAuthFlow = async () => {
   const creds = JSON.parse(fs.readFileSync(CLIENT_SECRETS_PATH, "utf8")).installed;
@@ -65,6 +68,15 @@ const getSavedTokens = () => {
   if (!fs.existsSync(TOKEN_PATH)) return null;
   try {
     return JSON.parse(fs.readFileSync(TOKEN_PATH, "utf8"));
+  } catch {
+    return null;
+  }
+};
+
+const getClientSecrets = () => {
+  if (!fs.existsSync(CLIENT_SECRETS_PATH)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(CLIENT_SECRETS_PATH, "utf8"));
   } catch {
     return null;
   }
@@ -135,6 +147,17 @@ const refreshAccessToken = async (tokens) => {
 };
 
 const getTokens = async (win) => {
+  if (!fs.existsSync(CLIENT_SECRETS_PATH) || !userEnteredSecretsPath) {
+    await dialog.showMessageBox(win, {
+      type: "error",
+      title: "Missing Client Secrets File",
+      message: `The client secrets file could not be found at the following path: ${CLIENT_SECRETS_PATH}\n\nPlease verify that the file exists and the correct path is entered in config.json, and try again.\nInformation on how to get the client secrets can be found in the README.`,
+      buttons: ["OK"],
+    });
+
+    throw new Error(`Client secrets file could not be found at ${CLIENT_SECRETS_PATH}`);
+  }
+
   let tokens = getSavedTokens();
 
   if (!tokens) {
@@ -175,6 +198,7 @@ const getTokens = async (win) => {
 module.exports = {
   startOAuthFlow,
   getSavedTokens,
+  getClientSecrets,
   saveTokens,
   tokensExpired,
   exchangeCodeForTokens,

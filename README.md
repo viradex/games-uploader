@@ -8,6 +8,7 @@ The `config.json` file is required for the app to run and follows this syntax:
 
 ```json
 {
+  "clientSecretsPath": "C:\\Data\\client_secrets.json",
   "defaultDirectory": "",
   "showCompletionPopup": false,
   "shutDownOnComplete": false,
@@ -18,6 +19,14 @@ The `config.json` file is required for the app to run and follows this syntax:
   }
 }
 ```
+
+### Client Secrets
+
+Mandatory value, the file must exist and be valid, or else the app will crash on startup.
+
+Must point to a valid JSON client secrets file obtained from the Google Cloud Console. It is important to keep this file private!
+
+Double backslashes are required if using backslashes in the path (e.g. `C:\\Data\\Videos`).
 
 ### Default Directory
 

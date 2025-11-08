@@ -1,5 +1,6 @@
 {
   "defaultDirectory": "",
+  "clientSecretsPath": "./src/backend/auth/client_secrets.json",
   "showCompletionPopup": false,
   "shutDownOnComplete": false,
   "playlists": {

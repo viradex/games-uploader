@@ -1,14 +1,16 @@
 class QueueManager {
-  constructor(win, uploads) {
+  constructor(win, uploads, queueChangeCallback = () => {}) {
     this.queue = [];
     this.current = null;
     this.isProcessing = false;
     this.win = win;
     this.uploads = uploads;
+    this.queueChangeCallback = queueChangeCallback;
   }
 
   add(upload) {
     this.queue.push(upload);
+    this.queueChangeCallback(this.queue, !!this.current);
 
     if (this.win && !this.win.isDestroyed()) {
       this.win.webContents.send("upload-progress", {
@@ -29,6 +31,7 @@ class QueueManager {
 
     this.isProcessing = true;
     this.current = this.queue.shift();
+    this.queueChangeCallback(this.queue, !!this.current);
 
     try {
       await this.current.startUpload((progress) => {
@@ -49,6 +52,7 @@ class QueueManager {
 
     this.current = null;
     this.isProcessing = false;
+    this.queueChangeCallback(this.queue, !!this.current);
 
     this.processNext();
   }
@@ -59,21 +63,43 @@ class QueueManager {
 
   cancelAllPending() {
     this.queue.forEach((upload) => {
-      // Cancels all pending uploads
-      return upload.cancel?.();
+      if (this.win && !this.win.isDestroyed()) {
+        this.win.webContents.send("remove-upload", upload.uuid);
+      }
     });
+
     this.queue = [];
+    this.queueChangeCallback(this.queue, !!this.current);
   }
 
   cancelSpecific(uuid) {
     if (this.current && this.current.uuid === uuid) {
       this.cancelCurrent();
-    } else {
-      this.queue.forEach((upload) => {
-        if (upload.uuid === uuid) {
-          upload.cancel();
+      return;
+    }
+
+    // Prevents a race condition when cancelling the first element in
+    // queue during an ongoing upload (where this.current is not null)
+    for (const [index, upload] of this.queue.entries()) {
+      if (upload.uuid === uuid) {
+        upload.cancel();
+        const cancelledUpload = this.queue.splice(index, 1)[0];
+        this.queueChangeCallback(this.queue, !!this.current);
+
+        if (this.win && !this.win.isDestroyed()) {
+          this.win.webContents.send("upload-progress", {
+            uuid: cancelledUpload.uuid,
+            status: "cancel",
+            percentDone: 0,
+            sizeDone: 0,
+            totalSize: cancelledUpload.totalSize,
+            speed: 0,
+          });
+
+          this.win.webContents.send("remove-upload", cancelledUpload.uuid);
         }
-      });
+        break;
+      }
     }
   }
 
@@ -82,7 +108,7 @@ class QueueManager {
     this.cancelAllPending();
   }
 
-  hasPendingOrActiveUploads() {
+  hasActiveOrPendingUploads() {
     return this.isProcessing || this.queue.length > 0;
   }
 }

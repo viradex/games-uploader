@@ -3,8 +3,7 @@ const path = require("path");
 const { dialog } = require("electron");
 
 const getConfig = () => {
-  // const configPath = path.join(app.getPath("userData"), "config.json");
-  const configPath = path.join(__dirname, "../../config.json"); // temporary TODO remove for prod
+  const configPath = path.join(process.cwd(), "config.json");
 
   if (!fs.existsSync(configPath)) {
     dialog.showErrorBox(
@@ -27,7 +26,7 @@ const getConfig = () => {
 };
 
 const setConfig = (obj) => {
-  const configPath = path.join(__dirname, "../../config.json");
+  const configPath = path.join(process.cwd(), "config.json");
   const config = getConfig();
   const newConfig = { ...config, ...obj };
 

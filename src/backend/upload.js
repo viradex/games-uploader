@@ -26,6 +26,7 @@ class Upload {
     totalSize,
     playlist,
     tokens,
+    clientSecrets,
     win,
     showCompletionPopup = true
   ) {
@@ -37,6 +38,7 @@ class Upload {
     this.totalSize = totalSize;
     this.playlist = playlist;
     this.tokens = tokens;
+    this.clientSecrets = clientSecrets;
     this.win = win; // window
     this.showCompletionPopup = showCompletionPopup;
 
@@ -64,9 +66,9 @@ class Upload {
     }
 
     const oauth2Client = new google.auth.OAuth2(
-      this.tokens.client_id,
-      this.tokens.client_secret,
-      this.tokens.redirect_uri
+      this.clientSecrets.client_id,
+      this.clientSecrets.client_secret,
+      this.clientSecrets.redirect_uri
     );
     oauth2Client.setCredentials(this.tokens);
 

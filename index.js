@@ -2,9 +2,9 @@ const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 
 const { getConfig, setConfig } = require("./src/backend/config.js");
-const createAppMenu = require("./src/backend/menu.js");
+const { createAppMenu, updateCancelMenuItems } = require("./src/backend/menu.js");
 const { getVideoDetails } = require("./src/backend/selectVideo.js");
-const { getTokens } = require("./src/backend/auth/googleAuth.js");
+const { getTokens, getClientSecrets } = require("./src/backend/auth/googleAuth.js");
 const { confirmCloseApp } = require("./src/utils.js");
 const Upload = require("./src/backend/upload.js");
 const QueueManager = require("./src/backend/queue.js");
@@ -12,6 +12,7 @@ const QueueManager = require("./src/backend/queue.js");
 let config;
 let win; // So other functions can access it
 let tokens;
+let clientSecrets;
 let queueManager;
 
 const uploads = new Map();
@@ -35,7 +36,11 @@ const createWindow = () => {
   });
 
   win.loadFile("index.html");
-  createAppMenu(win);
+
+  queueManager = new QueueManager(win, uploads, (queue, current) => {
+    updateCancelMenuItems(queueManager, queue, current);
+  });
+  createAppMenu(win, queueManager);
 };
 
 app.whenReady().then(async () => {
@@ -44,9 +49,8 @@ app.whenReady().then(async () => {
     createWindow();
 
     tokens = await getTokens(win);
+    clientSecrets = getClientSecrets();
     console.log("YouTube tokens obtained successfully!");
-
-    queueManager = new QueueManager(win, uploads);
 
     win.webContents.on("did-finish-load", () => {
       win.webContents.send("update-checkboxes", {
@@ -75,6 +79,7 @@ ipcMain.on("start-upload", async (event, details) => {
     details.totalSize,
     details.playlist,
     tokens,
+    clientSecrets,
     win,
     config.showCompletionPopup ?? true
   );
