@@ -5,7 +5,6 @@ const { dialog } = require("electron");
 const getConfig = () => {
   // const configPath = path.join(app.getPath("userData"), "config.json");
   const configPath = path.join(__dirname, "../../config.json"); // temporary TODO remove for prod
-  let config;
 
   if (!fs.existsSync(configPath)) {
     dialog.showErrorBox(

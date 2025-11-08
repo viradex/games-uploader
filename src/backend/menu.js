@@ -1,30 +1,35 @@
-const { Menu, dialog } = require("electron");
+const { Menu, dialog, shell } = require("electron");
+const path = require("path");
+
+const combineVideos = require("./combineVideos.js");
 
 const createAppMenu = (win) => {
   const menuTemplate = [
     {
       label: "File",
       submenu: [
-        // {
-        //   label: "Upload Video",
-        //   click: () => {
-        //     win.webContents.send("select-video"); // TODO fix, currently does nothing
-        //   },
-        // },
+        {
+          label: "Combine Videos",
+          click: async () => {
+            await combineVideos(win);
+          },
+        },
+        { type: "separator" },
         {
           label: "Settings",
-          click: () => {
-            dialog.showMessageBox(win, {
+          click: async () => {
+            await dialog.showMessageBox(win, {
               message:
-                "To edit settings, find the config.json file and change settings there.\n\nMore information can be found in the README.",
+                "Editing settings must be done manually in the config.json file. Once this window is closed, the config.json file will open where you can edit settings.\n\nFor more information on how to use this file, see the README.",
               title: "Editing Settings",
               type: "info",
               buttons: ["OK"],
               defaultId: 0,
             });
+
+            shell.openPath(path.join(__dirname, "../../config.json")); // TODO change?
           },
         },
-        { type: "separator" },
         { role: "quit" },
       ],
     },

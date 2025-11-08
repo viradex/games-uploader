@@ -2,8 +2,7 @@ const path = require("path");
 const fs = require("fs").promises;
 const { execFile } = require("child_process");
 const crypto = require("crypto");
-
-const ffprobePath = require("ffprobe-static").path; // Binary location
+const ffmpegPath = require("ffmpeg-static");
 
 const parseVideoTitle = (filename) => {
   // Remove file extension
@@ -50,22 +49,22 @@ const parseVideoTitle = (filename) => {
 
 const getVideoDuration = (filePath) => {
   return new Promise((resolve, reject) => {
-    execFile(
-      ffprobePath,
-      [
-        "-v",
-        "error", // Sets verbosity to error only, suppressing warnings and info messages
-        "-show_entries",
-        "format=duration",
-        "-of",
-        "default=noprint_wrappers=1:nokey=1", // Sets output format
-        filePath,
-      ],
-      (err, stdout) => {
-        if (err) return reject(err);
-        resolve(parseFloat(stdout)); // Duration in seconds
+    execFile(ffmpegPath, ["-i", filePath], (err, stdout, stderr) => {
+      // Converts to seconds
+      // TODO This isn't really necessary, it's more compatibility for formatDuration()
+      // It can be slightly changed but doesn't need to be converted to secs and back
+      const match = stderr.match(/Duration: (\d{2}):(\d{2}):(\d{2}\.\d+)/);
+
+      if (match) {
+        const hours = parseInt(match[1]);
+        const minutes = parseInt(match[2]);
+        const seconds = parseFloat(match[3]);
+
+        resolve(hours * 3600 + minutes * 60 + seconds);
+      } else {
+        reject(new Error("Could not parse duration"));
       }
-    );
+    });
   });
 };
 
