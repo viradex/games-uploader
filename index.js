@@ -7,10 +7,12 @@ const { getVideoDetails } = require("./src/backend/selectVideo.js");
 const { getTokens } = require("./src/backend/auth/googleAuth.js");
 const { confirmCloseApp } = require("./src/utils.js");
 const Upload = require("./src/backend/upload.js");
+const QueueManager = require("./src/backend/queue.js");
 
 let config;
 let win; // So other functions can access it
 let tokens;
+let queueManager;
 
 const uploads = new Map();
 
@@ -29,7 +31,7 @@ const createWindow = () => {
   });
 
   win.on("close", async (e) => {
-    confirmCloseApp(uploads, win, e);
+    confirmCloseApp(queueManager, win, e);
   });
 
   win.loadFile("index.html");
@@ -43,6 +45,8 @@ app.whenReady().then(async () => {
 
     tokens = await getTokens(win);
     console.log("YouTube tokens obtained successfully!");
+
+    queueManager = new QueueManager(win, uploads);
 
     win.webContents.on("did-finish-load", () => {
       win.webContents.send("update-checkboxes", {
@@ -76,29 +80,12 @@ ipcMain.on("start-upload", async (event, details) => {
   );
 
   uploads.set(details.uuid, uploadInstance);
-  console.log(`Upload started for ${details.title} with UUID ${details.uuid}`);
-
-  try {
-    await uploadInstance.startUpload((progress) => {
-      if (!win || win.isDestroyed()) return;
-      win.webContents.send("upload-progress", progress);
-    });
-  } catch (err) {
-    console.log(`Upload failed for video ${details.title} with UUID ${details.uuid}`);
-    console.log(err);
-  } finally {
-    uploads.delete(details.uuid);
-    if (win && !win.isDestroyed()) {
-      win.webContents.send("remove-upload", details.uuid);
-    }
-  }
+  queueManager.add(uploadInstance);
+  console.log(`Upload queued for ${details.title} with UUID ${details.uuid}`);
 });
 
 ipcMain.on("cancel-upload", async (event, uuid) => {
-  const upload = uploads.get(uuid);
-  if (upload) {
-    upload.cancel();
-  }
+  queueManager.cancelSpecific(uuid);
 });
 
 ipcMain.on("update-config", (event, newValues) => {

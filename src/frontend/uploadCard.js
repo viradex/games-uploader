@@ -44,6 +44,9 @@ const updateCard = async (uuid, status, percentDone, sizeDone, totalSize, speed)
 
   let statusText = "";
   switch (status) {
+    case "queue":
+      statusText = `Waiting for other videos to upload...`;
+      break;
     case "init":
       statusText = "Initializing...";
       break;

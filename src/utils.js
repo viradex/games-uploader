@@ -5,8 +5,8 @@ const sleep = async (ms) => {
 };
 
 // TODO does this function belong here?
-const confirmCloseApp = async (uploads, win, event) => {
-  if (uploads.size > 0) {
+const confirmCloseApp = async (queueManager, win, event) => {
+  if (queueManager.hasPendingOrActiveUploads()) {
     event.preventDefault();
 
     const result = await dialog.showMessageBox(win, {
@@ -21,6 +21,7 @@ const confirmCloseApp = async (uploads, win, event) => {
     });
 
     if (result.response === 0) {
+      queueManager.cancelAll();
       win.destroy();
     }
   }
