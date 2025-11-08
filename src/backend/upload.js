@@ -154,25 +154,42 @@ class Upload {
 
       return true;
     } catch (err) {
-      this.status = "fail";
-      this.#emit(progressCallback);
+      if (err.message.toLowerCase() === "the operation was aborted.") {
+        // not really clean check
+        this.status = "cancel";
+        this.#emit(progressCallback);
 
-      // Do not use showErrorBox() due to it being synchronous
-      await dialog.showMessageBox(this.win, {
-        type: "error",
-        title: "Failed to Upload Video",
-        message: `An error occurred while uploading the video "${
-          this.title
-        }". The console has more detailed error information that can be reported to the developer if necessary.\n\nError message: ${
-          err.message || "N/A"
-        }`,
-        buttons: ["OK"],
-      });
+        console.log(`Upload aborted by user: "${this.title}" with UUID ${this.uuid}`);
+      } else {
+        this.status = "fail";
+        this.#emit(progressCallback);
 
-      console.log(`Uploading the video ${this.title} with UUID of ${this.uuid} has failed!`);
-      console.log(err);
+        // Do not use showErrorBox() due to it being synchronous
+        await dialog.showMessageBox(this.win, {
+          type: "error",
+          title: "Failed to Upload Video",
+          message: `An error occurred while uploading the video "${
+            this.title
+          }". The console has more detailed error information that can be reported to the developer if necessary.\n\nError message: ${
+            err.message || "N/A"
+          }`,
+          buttons: ["OK"],
+        });
+
+        console.log(`Uploading the video ${this.title} with UUID of ${this.uuid} has failed!`);
+        console.log(err);
+      }
 
       return false;
+    }
+  }
+
+  cancel() {
+    if (this.abortController) {
+      this.abortController.abort();
+      this.status = "cancel";
+
+      console.log(`Upload cancelled for ${this.title} with UUID ${this.uuid}`);
     }
   }
 }

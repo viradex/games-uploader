@@ -28,13 +28,6 @@ const createWindow = () => {
     icon: path.join(__dirname, "assets", "icon.ico"),
   });
 
-  // TODO Fix error dialog box that appears if the window is closed during an upload
-  // This is the error:
-  // TypeError: Object has been destroyed
-  //     at D:\Coding\games-uploader\index.js:94:11
-  //     at #emit (D:\Coding\games-uploader\src\backend\upload.js:50:5)
-  //     at Object.onUploadProgress (D:\Coding\games-uploader\src\backend\upload.js:116:23)
-  // Could this be fixed by using win.isDestroyed()?
   win.on("close", async (e) => {
     confirmCloseApp(uploads, win, e);
   });
@@ -87,6 +80,7 @@ ipcMain.on("start-upload", async (event, details) => {
 
   try {
     await uploadInstance.startUpload((progress) => {
+      if (!win || win.isDestroyed()) return;
       win.webContents.send("upload-progress", progress);
     });
   } catch (err) {
@@ -94,13 +88,17 @@ ipcMain.on("start-upload", async (event, details) => {
     console.log(err);
   } finally {
     uploads.delete(details.uuid);
-    win.webContents.send("remove-upload", details.uuid);
+    if (win && !win.isDestroyed()) {
+      win.webContents.send("remove-upload", details.uuid);
+    }
   }
 });
 
 ipcMain.on("cancel-upload", async (event, uuid) => {
-  // TODO AbortController with Upload instance
-  uploads.delete(uuid);
+  const upload = uploads.get(uuid);
+  if (upload) {
+    upload.cancel();
+  }
 });
 
 ipcMain.on("update-config", (event, newValues) => {
