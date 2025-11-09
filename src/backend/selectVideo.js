@@ -1,4 +1,4 @@
-const { selectVideos } = require("./utils.js");
+const { selectVideos, sleep } = require("./utils.js");
 const getDetails = require("./getDetails.js");
 
 /**

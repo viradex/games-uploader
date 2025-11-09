@@ -3,7 +3,7 @@ import { addUploadCard, updateCard, removeUploadCard } from "./src/frontend/uplo
 const uploadBtn = document.getElementById("uploadBtn");
 const uploadContainer = document.getElementById("uploadContainer");
 
-const completionPopupChk = document.getElementById("showCompletionNotification");
+const completionPopupChk = document.getElementById("dontShowCompletionNotification");
 const shutDownChk = document.getElementById("shutDownOnComplete");
 
 // When the 'Upload Videos' button has been selected
@@ -13,7 +13,7 @@ uploadBtn.addEventListener("click", () => {
 
 // When either checkbox has been selected
 completionPopupChk.addEventListener("change", (e) => {
-  window.electronAPI.updateConfig({ showCompletionNotification: e.target.checked });
+  window.electronAPI.updateConfig({ dontShowCompletionNotification: e.target.checked });
 });
 shutDownChk.addEventListener("change", (e) => {
   completionPopupChk.checked = e.target.checked;
@@ -21,13 +21,13 @@ shutDownChk.addEventListener("change", (e) => {
 
   window.electronAPI.updateConfig({
     shutDownOnComplete: e.target.checked,
-    showCompletionNotification: e.target.checked,
+    dontShowCompletionNotification: e.target.checked,
   });
 });
 
 // When the config file first loads, change checkbox states to reflect it
 window.electronAPI.onUpdateCheckboxes((states) => {
-  completionPopupChk.checked = states.showCompletionNotification;
+  completionPopupChk.checked = states.dontShowCompletionNotification;
   shutDownChk.checked = states.shutDownOnComplete;
 
   if (states.shutDownOnComplete) {

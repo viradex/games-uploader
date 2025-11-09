@@ -92,7 +92,7 @@ app.whenReady().then(async () => {
     // Once the webpage has loaded, update checkboxes to whatever the config is
     win.webContents.on("did-finish-load", () => {
       win.webContents.send("update-checkboxes", {
-        showCompletionNotification: config.showCompletionNotification,
+        dontShowCompletionNotification: config.dontShowCompletionNotification,
         shutDownOnComplete: config.shutDownOnComplete,
       });
     });

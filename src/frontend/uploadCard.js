@@ -50,11 +50,6 @@ const addUploadCard = (upload, container) => {
 
   // Insert at the top if it's the current upload
   container.appendChild(card);
-  if (!container.firstChild) {
-    container.appendChild(card);
-  } else {
-    container.insertBefore(card, container.firstChild);
-  }
 
   window.electronAPI.startUpload(upload);
 };

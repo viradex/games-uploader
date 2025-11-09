@@ -61,7 +61,7 @@ You can use this content below to populate the file and modify it to your config
 {
   "clientSecretsPath": "C:\\Data\\client_secrets.json",
   "defaultDirectory": "",
-  "showCompletionNotification": false,
+  "dontShowCompletionNotification": false,
   "shutDownOnComplete": false,
   "videoCheckLimit": 50,
   "playlists": {
@@ -86,7 +86,7 @@ Double backslashes are required if using backslashes in the path (e.g. `C:\\Data
 ### Show Completion Popup and Shutdown on Complete
 
 This setting can be modified in the UI.
-If `showCompletionNotification` is `true`, a message box will be shown every time an upload completes.
+If `dontShowCompletionNotification` is `true`, a message box will be shown every time an upload completes.
 If `shutDownOnComplete` is `true`, the computer will automatically shut down 60 seconds after the final video has been uploaded.
 If the shut down on complete option is set to `true`, the show completion popups option will be set to `true` regardless of the value entered.
 

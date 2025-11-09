@@ -185,7 +185,7 @@ class Upload {
       this.#emit(progressCallback);
 
       // Show system notification if allowed
-      if (getConfig().showCompletionNotification) {
+      if (!getConfig().dontShowCompletionNotification) {
         new Notification({
           title: "Upload Complete",
           body: `Successfully uploaded the video "${this.title}"`,
