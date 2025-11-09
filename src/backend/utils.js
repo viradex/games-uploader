@@ -54,7 +54,7 @@ const selectVideos = async (title, buttonName = "OK") => {
  * @param {string} title Title to check
  * @param {any} win The main BrowserWindow
  * @param {number} limit Maximum number of recent videos to check (default 50)
- * @returns {Promise<boolean>} See conditions above.
+ * @returns {Promise<boolean>} See conditions above
  */
 const videoExists = async (tokens, title, win, limit = 50) => {
   try {
@@ -103,7 +103,7 @@ const videoExists = async (tokens, title, win, limit = 50) => {
     dialog.showMessageBox(this.win, {
       type: "error",
       title: "Failed to Check if Video Exists",
-      message: `An error occurred while checking if the provided video already existed. The console has more detailed error information that can be reported to the developer if necessary.\n\nError message: ${
+      message: `An error occurred while checking if the provided video already existed.\n\nError message: ${
         err.message || "N/A"
       }`,
       buttons: ["OK"],

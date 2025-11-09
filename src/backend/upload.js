@@ -213,9 +213,7 @@ class Upload {
           title: "Failed to Upload Video",
           message: `An error occurred while uploading the video "${
             this.title
-          }". The console has more detailed error information that can be reported to the developer if necessary.\n\nError message: ${
-            err.message || "N/A"
-          }`,
+          }".\n\nError message: ${err.message || "N/A"}`,
           buttons: ["OK"],
         });
 

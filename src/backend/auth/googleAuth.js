@@ -67,7 +67,7 @@ const startOAuthFlow = async () => {
       const error = url.searchParams.get("error");
 
       if (error) {
-        res.end("Authentication error. You may close this window.");
+        res.end("Authentication error. You can close this window.");
         server.close();
         return reject(new Error(error));
       }
@@ -245,7 +245,7 @@ const getTokens = async (win) => {
       defaultId: 0,
       title: "Google Authentication Required",
       message:
-        "Your token has expired or does not exist. Please sign in to your Google account that you want to upload videos to.\n\nA webpage should open after closing this message. If it doesn't, see the console for the URL and enter it manually.",
+        "Your token has expired or does not exist. Please sign in to your Google account that you want to upload videos to.\n\nA webpage should open after closing this message. For information, see the README.",
     });
 
     const code = await startOAuthFlow();

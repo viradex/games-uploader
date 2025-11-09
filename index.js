@@ -10,12 +10,6 @@ const Upload = require("./src/backend/upload.js");
 const QueueManager = require("./src/backend/queue.js");
 
 /**
- * Configuration file contents
- * @type {Object}
- */
-let config;
-
-/**
  * Main window reference for dialogs (instance of `BrowserWindow`)
  * @type {BrowserWindow}
  */
@@ -56,6 +50,7 @@ const createWindow = () => {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      devTools: false,
       preload: path.join(__dirname, "preload.js"),
     },
     icon: path.join(__dirname, "assets", "icon.ico"),
@@ -83,7 +78,7 @@ const createWindow = () => {
 
 app.whenReady().then(async () => {
   try {
-    config = getConfig();
+    const config = getConfig();
     createWindow();
 
     // For notifications
@@ -114,10 +109,14 @@ ipcMain.on("select-video", async (event) => {
 });
 
 ipcMain.on("start-upload", async (event, details) => {
-  const exists = await videoExists(tokens, details.title, win, 50);
-  if (exists) {
-    win.webContents.send("remove-upload", details.uuid);
-    return;
+  // Gets the number of videos the user wishes to check
+  const videoCheckLimit = getConfig().videoCheckLimit;
+  if (videoCheckLimit >= 1) {
+    const exists = await videoExists(tokens, details.title, win, videoCheckLimit);
+    if (exists) {
+      win.webContents.send("remove-upload", details.uuid);
+      return;
+    }
   }
 
   // Creates new instance of Upload

@@ -48,8 +48,14 @@ const addUploadCard = (upload, container) => {
     await removeUploadCard(upload.uuid, true);
   });
 
-  // Adds the card to the UI and queue
+  // Insert at the top if it's the current upload
   container.appendChild(card);
+  if (!container.firstChild) {
+    container.appendChild(card);
+  } else {
+    container.insertBefore(card, container.firstChild);
+  }
+
   window.electronAPI.startUpload(upload);
 };
 

@@ -42,7 +42,7 @@ const confirmRemoval = async (win, multiple = false) => {
 const createAppMenu = (win, queueManager) => {
   const menuTemplate = [
     {
-      label: "File",
+      label: "Videos",
       submenu: [
         {
           label: "Upload Videos",
@@ -99,7 +99,7 @@ const createAppMenu = (win, queueManager) => {
             // Shows message explaining that settings must be edited manually
             await dialog.showMessageBox(win, {
               message:
-                "Editing settings must be done manually in the config.json file. Once this window is closed, the config.json file will open where you can edit settings.\nYou must restart the app for changes to apply.\n\nFor more information on how to use this file, see the README.",
+                "Editing settings must be done manually in the config.json file. Once this window is closed, the config.json file will open where you can edit settings.\n\nFor more information on how to use this file, see the README.",
               title: "Editing Settings",
               type: "info",
               buttons: ["OK"],
@@ -113,12 +113,7 @@ const createAppMenu = (win, queueManager) => {
         { role: "quit" },
       ],
     },
-    {
-      role: "viewMenu",
-    },
-    {
-      role: "windowMenu",
-    },
+    { role: "windowMenu" },
   ];
 
   // Set as app's global menu bar
