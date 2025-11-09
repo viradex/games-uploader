@@ -37,10 +37,14 @@ window.electronAPI.onUpdateCheckboxes((states) => {
 });
 
 // When all details of the video have been received, make a new upload card
-window.electronAPI.onVideoDetails((details) => {
-  details.forEach((video) => {
+window.electronAPI.onVideoDetails(async (details) => {
+  for (const video of details) {
     addUploadCard(video, uploadContainer);
-  });
+  }
+
+  for (const video of details) {
+    await window.electronAPI.startUpload(video);
+  }
 });
 
 // If a video has been removed not from the UI, update it
@@ -50,6 +54,6 @@ window.electronAPI.onUploadRemoval((uuid) => {
 
 // Changes respective upload card when status or progress has changed
 window.electronAPI.onUploadProgress((details) => {
-  const { uuid, status, percentDone, sizeDone, totalSize, speed } = details;
-  updateCard(uuid, status, percentDone, sizeDone, totalSize, speed);
+  const { uuid, status, percentDone, sizeDone, totalSize, speed, eta } = details;
+  updateCard(uuid, status, percentDone, sizeDone, totalSize, speed, eta);
 });

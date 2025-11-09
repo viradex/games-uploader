@@ -38,7 +38,9 @@ const addUploadCard = (upload, container) => {
 
     <div class="uploadFooter">
       <div class="uploadStatus">Initializing...</div>
-      <div class="uploadSize">0 MB / ${Math.round(parseFloat(upload.totalSize))} MB (0 MB/s)</div>
+      <div class="uploadSize">0 MB / ${Math.round(
+        parseFloat(upload.totalSize)
+      )} MB (0 MB/s) • ETA: unknown</div>
     </div>
   `;
 
@@ -50,8 +52,6 @@ const addUploadCard = (upload, container) => {
 
   // Insert at the top if it's the current upload
   container.appendChild(card);
-
-  window.electronAPI.startUpload(upload);
 };
 
 /**
@@ -65,8 +65,9 @@ const addUploadCard = (upload, container) => {
  * @param {string | number} sizeDone Size uploaded currently
  * @param {string | number} totalSize Total size of upload
  * @param {string | number} speed Speed in MB/s of upload
+ * @param {string} eta Estimated time of completion
  */
-const updateCard = async (uuid, status, percentDone, sizeDone, totalSize, speed) => {
+const updateCard = async (uuid, status, percentDone, sizeDone, totalSize, speed, eta) => {
   const card = document.getElementById(uuid);
 
   const progressBar = card.querySelector(".uploadProgressBar");
@@ -110,7 +111,7 @@ const updateCard = async (uuid, status, percentDone, sizeDone, totalSize, speed)
   statusDiv.textContent = statusText;
   sizeText.textContent = `${Math.round(sizeDone)} MB / ${Math.round(totalSize)} MB (${speed.toFixed(
     2
-  )} MB/s)`;
+  )} MB/s) • ETA: ${eta ?? "unknown"}`;
 };
 
 /**

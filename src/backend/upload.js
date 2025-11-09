@@ -66,6 +66,7 @@ class Upload {
       sizeDone: this.sizeDone / (1024 * 1024),
       totalSize: this.totalSize,
       speed: overrides.speed ?? 0,
+      eta: overrides.eta ?? "unknown",
       ...overrides,
     });
   }
@@ -93,11 +94,34 @@ class Upload {
   }
 
   /**
+   * Formats the ETA into a nice string from seconds.
+   *
+   * Examples:
+   * - 23s
+   * - 35m 10s
+   * - 2h 10m 59s
+   * - 25h 42m 0s
+   *
+   * @param {number} seconds ETA in seconds
+   * @returns The formatted ETA
+   */
+  #formatETA(seconds) {
+    seconds = Math.max(0, Math.round(seconds));
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+  }
+
+  /**
    * Calculates current progress of upload and upload speed.
    *
    * @param {number} uploadedBytes Current uploaded bytes (progress)
    * @param {number} startTime Time from `Date.now()`
-   * @returns {number} Speed in MB/s
+   * @returns {{ speed: number, eta: string }} Speed in MB/s and ETA
    */
   #calculateProgress(uploadedBytes, startTime) {
     // Converts video size from megabytes to bytes
@@ -111,7 +135,12 @@ class Upload {
     const elapsedSec = (Date.now() - startTime) / 1000;
     const speedMB = elapsedSec > 0 ? uploadedBytes / elapsedSec / (1024 * 1024) : 0;
 
-    return speedMB;
+    let eta = "unknown";
+    if (speedMB > 0) {
+      eta = this.#formatETA((totalBytes - uploadedBytes) / (speedMB * 1024 * 1024));
+    }
+
+    return { speed: speedMB, eta };
   }
 
   /**
@@ -139,6 +168,10 @@ class Upload {
       const start = Date.now();
       this.abortController = new AbortController();
 
+      // For ETA
+      let lastEmit = 0;
+      const minInterval = 200;
+
       // Sends video file to YouTube
       const res = await youtube.videos.insert(
         {
@@ -154,8 +187,13 @@ class Upload {
           onUploadProgress: (evt) => {
             // Called repeatedly, for changing UI progress
             uploadedBytes = evt.bytesRead;
-            const speed = this.#calculateProgress(uploadedBytes, start);
-            this.#emit(progressCallback, { speed });
+            const now = Date.now();
+
+            if (now - lastEmit >= minInterval || uploadedBytes === this.totalSize * 1024 * 1024) {
+              const { speed, eta } = this.#calculateProgress(uploadedBytes, start);
+              this.#emit(progressCallback, { speed, eta });
+              lastEmit = now;
+            }
           },
         }
       );
