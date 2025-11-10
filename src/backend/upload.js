@@ -66,7 +66,7 @@ class Upload {
       sizeDone: this.sizeDone / (1024 * 1024),
       totalSize: this.totalSize,
       speed: overrides.speed ?? 0,
-      eta: overrides.eta ?? "unknown",
+      eta: overrides.eta ?? "—",
       ...overrides,
     });
   }
@@ -135,7 +135,7 @@ class Upload {
     const elapsedSec = (Date.now() - startTime) / 1000;
     const speedMB = elapsedSec > 0 ? uploadedBytes / elapsedSec / (1024 * 1024) : 0;
 
-    let eta = "unknown";
+    let eta = "—";
     if (speedMB > 0) {
       eta = this.#formatETA((totalBytes - uploadedBytes) / (speedMB * 1024 * 1024));
     }
@@ -154,14 +154,14 @@ class Upload {
   async startUpload(progressCallback) {
     try {
       this.status = "auth";
-      this.#emit(progressCallback);
+      this.#emit(progressCallback, { eta: "..." });
 
       // Ensures tokens are valid and confirm authentication works
       const youtube = await this.#initOAuth();
       await youtube.channels.list({ part: "snippet", mine: true });
 
       this.status = "upload";
-      this.#emit(progressCallback);
+      this.#emit(progressCallback, { eta: "..." });
 
       // Prepare upload tracking and cancellation
       let uploadedBytes = 0;
@@ -189,6 +189,7 @@ class Upload {
             uploadedBytes = evt.bytesRead;
             const now = Date.now();
 
+            // Only updates the ETA as often as defined in 'minInterval'
             if (now - lastEmit >= minInterval || uploadedBytes === this.totalSize * 1024 * 1024) {
               const { speed, eta } = this.#calculateProgress(uploadedBytes, start);
               this.#emit(progressCallback, { speed, eta });
@@ -199,7 +200,7 @@ class Upload {
       );
 
       this.status = "process";
-      this.#emit(progressCallback);
+      this.#emit(progressCallback, { sizeDone: this.totalSize, eta: "—" });
 
       const videoId = res.data.id;
 

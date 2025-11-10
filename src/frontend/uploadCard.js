@@ -40,7 +40,7 @@ const addUploadCard = (upload, container) => {
       <div class="uploadStatus">Initializing...</div>
       <div class="uploadSize">0 MB / ${Math.round(
         parseFloat(upload.totalSize)
-      )} MB (0 MB/s) • ETA: unknown</div>
+      )} MB (0 MB/s) • ETA: —</div>
     </div>
   `;
 
@@ -111,7 +111,7 @@ const updateCard = async (uuid, status, percentDone, sizeDone, totalSize, speed,
   statusDiv.textContent = statusText;
   sizeText.textContent = `${Math.round(sizeDone)} MB / ${Math.round(totalSize)} MB (${speed.toFixed(
     2
-  )} MB/s) • ETA: ${eta ?? "unknown"}`;
+  )} MB/s) • ETA: ${eta ?? "—"}`;
 };
 
 /**

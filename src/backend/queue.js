@@ -40,6 +40,7 @@ class QueueManager {
         sizeDone: 0,
         totalSize: upload.totalSize,
         speed: 0,
+        eta: "...",
       });
     }
 
