@@ -16,6 +16,7 @@ Uploads clips of games from Medal.tv or other screen recorders!
     - [Default Directory](#default-directory)
     - [Show Completion Popup and Shutdown on Complete](#show-completion-popup-and-shutdown-on-complete)
     - [Video Check Limit](#video-check-limit)
+    - [Log Retention Weeks](#log-retention-weeks)
     - [Playlists](#playlists)
   - [Google Authentication](#google-authentication)
 - [Using the App](#using-the-app)
@@ -64,6 +65,7 @@ You can use this content below to populate the file and modify it to your config
   "dontShowCompletionNotification": false,
   "shutDownOnComplete": false,
   "videoCheckLimit": 50,
+  "logRetentionWeeks": 4,
   "playlists": {
     "2025/11": "PLExamplePlaylistID202511",
     "2025/12": "PLExamplePlaylistID202512",
@@ -95,6 +97,12 @@ If the shut down on complete option is set to `true`, the show completion popups
 When starting an upload, the app checks if the video title already exists in your YouTube channel to ensure no duplicates are uploaded.
 Changing this value can limit the number of videos checked. For example, changing this value to `20` will only check the 20 most recently uploaded videos.
 Setting this to `0` disables the check. Be warned that setting this number too high could cause the quota limit to be reached quickly. A value from 10-100 is recommended.
+
+### Log Retention Weeks
+
+The number of weeks until log files created by the app will be automatically deleted when the app starts.
+For example, if a log file was created five weeks prior to opening the app, it will be automatically deleted if the value is less than `5`.
+Settings this to `0` doesn't delete any files. Be warned that this can cause your disk space to be gradually filled up!
 
 ### Playlists
 

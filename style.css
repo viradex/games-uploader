@@ -269,6 +269,7 @@ body {
   min-height: 400px;
   overflow-y: auto;
   background-color: #000000;
+  color: #e5e5e5;
   border-radius: 10px;
   padding: 20px;
   display: flex;

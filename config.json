@@ -1,1 +1,13 @@
-{"clientSecretsPath":"./src/backend/auth/client_secrets.json","defaultDirectory":"","dontShowCompletionNotification":false,"shutDownOnComplete":false,"videoCheckLimit":20,"playlists":{"2025/11":"PLv6sd2Q-SX137Q9TOK757GHBEX45PCQw1","2025/12":"PLExamplePlaylistID202512","default":"PLv6sd2Q-SX11zyqT-s0rhVuzrSxPVQSLY"}}
+{
+  "clientSecretsPath": "./src/backend/auth/client_secrets.json",
+  "defaultDirectory": "",
+  "dontShowCompletionNotification": false,
+  "shutDownOnComplete": false,
+  "videoCheckLimit": 20,
+  "logRetentionWeeks": 4,
+  "playlists": {
+    "2025/11": "PLv6sd2Q-SX137Q9TOK757GHBEX45PCQw1",
+    "2025/12": "PLExamplePlaylistID202512",
+    "default": "PLv6sd2Q-SX11zyqT-s0rhVuzrSxPVQSLY"
+  }
+}

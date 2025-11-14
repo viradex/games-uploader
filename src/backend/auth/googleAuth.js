@@ -6,32 +6,38 @@ const { google } = require("googleapis");
 
 const { getConfig } = require("../config.js");
 
-const userDataPath = app.getPath("userData");
-
 /**
- * Redirect port for Google sign-in
- */
-const REDIRECT_PORT = 52719;
-
-/**
- * Redirect URL for Google sign-in
- */
-const REDIRECT_URI = `http://127.0.0.1:${REDIRECT_PORT}`;
-
-/**
- * Absolute path to `token.json` file
- */
-const TOKEN_PATH = path.join(userDataPath, "token.json");
-
-/**
- * Fixes uncaught error if config doesn't exist
+ * Gets the following variables:
+ * - `userDataPath`
+ * - `userEnteredSecretsPath`
+ * - `REDIRECT_PORT`
+ * - `REDIRECT_URI`
+ * - `TOKEN_PATH`
+ * - `CLIENT_SECRETS_PATH`
  *
- * @returns Path to user client secrets
+ * This function is for the purpose of fixing an issue
+ * where an uncaught exception would occur if the config didn't exist.
+ *
+ * @returns An object containing the variables above
  */
-const getClientSecretsPath = () => {
+const _getConstants = () => {
+  const userDataPath = app.getPath("userData");
   const userEnteredSecretsPath = getConfig().clientSecretsPath;
-  if (!userEnteredSecretsPath) return null;
-  return path.join(process.cwd(), userEnteredSecretsPath);
+
+  const REDIRECT_PORT = 52719;
+  const REDIRECT_URI = `http://127.0.0.1:${REDIRECT_PORT}`;
+
+  const TOKEN_PATH = path.join(userDataPath, "token.json");
+  const CLIENT_SECRETS_PATH = path.join(process.cwd(), userEnteredSecretsPath);
+
+  return {
+    userDataPath,
+    userEnteredSecretsPath,
+    REDIRECT_PORT,
+    REDIRECT_URI,
+    TOKEN_PATH,
+    CLIENT_SECRETS_PATH,
+  };
 };
 
 /**
@@ -40,7 +46,7 @@ const getClientSecretsPath = () => {
  * @returns {Promise<string | Error>} Promise with either an `Error` or the code
  */
 const startOAuthFlow = async () => {
-  const CLIENT_SECRETS_PATH = getClientSecretsPath();
+  const { REDIRECT_PORT, REDIRECT_URI, CLIENT_SECRETS_PATH } = _getConstants();
 
   const creds = JSON.parse(fs.readFileSync(CLIENT_SECRETS_PATH, "utf8")).installed;
   const clientId = creds.client_id;
@@ -100,6 +106,7 @@ const startOAuthFlow = async () => {
  * @returns {Object | null} The tokens as an object, or `null` if failed
  */
 const getSavedTokens = () => {
+  const { TOKEN_PATH } = _getConstants();
   if (!fs.existsSync(TOKEN_PATH)) return null;
 
   try {
@@ -115,7 +122,7 @@ const getSavedTokens = () => {
  * @returns {Object | null} The client secrets as an object, or `null` if failed
  */
 const getClientSecrets = () => {
-  const CLIENT_SECRETS_PATH = getClientSecretsPath();
+  const { CLIENT_SECRETS_PATH } = _getConstants();
   if (!fs.existsSync(CLIENT_SECRETS_PATH)) return null;
 
   try {
@@ -131,6 +138,7 @@ const getClientSecrets = () => {
  * @param {Object} tokens Tokens to be saved
  */
 const saveTokens = (tokens) => {
+  const { TOKEN_PATH } = _getConstants();
   fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens), "utf8");
 };
 
@@ -153,7 +161,7 @@ const tokensExpired = (tokens) => {
  * @throws Error if no authorization code was provided, or if the token exchange failed
  */
 const exchangeCodeForTokens = async (code) => {
-  const CLIENT_SECRETS_PATH = getClientSecretsPath();
+  const { CLIENT_SECRETS_PATH } = _getConstants();
   if (!code) throw new Error("No authorization code provided");
 
   // Reads client secrets to get body for request
@@ -192,7 +200,7 @@ const exchangeCodeForTokens = async (code) => {
  * @throws Error if no refresh token is the token, or if the token refresh failed
  */
 const refreshAccessToken = async (tokens) => {
-  const CLIENT_SECRETS_PATH = getClientSecretsPath();
+  const { CLIENT_SECRETS_PATH } = _getConstants();
   if (!tokens.refresh_token) throw new Error("No refresh token available");
 
   // Reads client secrets to get body for request
@@ -232,9 +240,7 @@ const refreshAccessToken = async (tokens) => {
  * @throws Error if client secrets file could not be accessed
  */
 const getTokens = async (win) => {
-  const CLIENT_SECRETS_PATH = getClientSecretsPath();
-  const userEnteredSecretsPath = getConfig().clientSecretsPath;
-
+  const { userEnteredSecretsPath, REDIRECT_URI, CLIENT_SECRETS_PATH } = _getConstants();
   // Ensures the client secrets file exists and the user has entered a path in config.json
   if (!fs.existsSync(CLIENT_SECRETS_PATH) || !userEnteredSecretsPath) {
     await dialog.showMessageBox(win, {

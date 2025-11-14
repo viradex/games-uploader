@@ -1,13 +1,17 @@
-const { BrowserWindow } = require("electron");
+const { BrowserWindow, shell, ipcMain } = require("electron");
 const path = require("path");
+
+const watchLogs = require("./logListen");
+const logger = require("./loggerSingleton");
 
 let logWin = null;
 
 /**
  * Creates (or focuses) the log viewer window.
+ *
  * @param {BrowserWindow} parent Optional parent window
  */
-function createLogWindow(parent) {
+const createLogWindow = (parent) => {
   if (logWin && !logWin.isDestroyed()) {
     logWin.focus();
     return logWin;
@@ -24,14 +28,19 @@ function createLogWindow(parent) {
     autoHideMenuBar: true,
     menuBarVisible: false,
     webPreferences: {
-      preload: path.join(__dirname, "..", "..", "..", "preload.js"),
+      preload: path.join(__dirname, "preloadLog.js"),
       nodeIntegration: false,
       contextIsolation: true,
+      devTools: false,
     },
     icon: path.join(__dirname, "..", "..", "..", "assets", "icon.ico"),
   });
 
   logWin.loadFile(path.join(__dirname, "log.html"));
+
+  logWin.webContents.on("did-finish-load", () => {
+    watchLogs(logWin);
+  });
 
   // Clean up reference when closed
   logWin.on("closed", () => {
@@ -39,8 +48,10 @@ function createLogWindow(parent) {
   });
 
   return logWin;
-}
-
-module.exports = {
-  createLogWindow,
 };
+
+ipcMain.on("open-log", async (event) => {
+  shell.openPath(logger.logPath);
+});
+
+module.exports = { createLogWindow };

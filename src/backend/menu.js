@@ -2,7 +2,7 @@ const { Menu, dialog, shell } = require("electron");
 const path = require("path");
 
 const combineVideos = require("./combineVideos.js");
-const getVideoDetails = require("./selectVideo.js");
+const { getVideoDetails } = require("./utils.js");
 const { createLogWindow } = require("./logging/initLogWin.js");
 
 /**

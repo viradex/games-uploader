@@ -57,9 +57,10 @@ class Logger {
         "",
         "--- START LOGGING ---",
         "",
+        "",
       ].join("\n");
     } else if (location === "footer") {
-      return ["--- END LOGGING ---", "", `Finished: ${formattedDate}`].join("\n");
+      return ["", "--- END LOGGING ---", "", `Finished: ${formattedDate}`, ""].join("\n");
     } else {
       throw new TypeError(
         `Parameter 'location' did not match expected values "header" or "footer", received "${location}"`
@@ -145,7 +146,7 @@ class Logger {
    * @param {string} message The message
    * @param {"debug" | "info" | "warning" | "error" | "critical"} level The severity level of the message, defaults to 'info'
    */
-  async addLogMessage(message, level = "info") {
+  async addLog(message, level = "info") {
     if (!(await this.#fileExists(this.logPath))) await this.createLogFile();
 
     const line = `[${this.#formatTime()}] [${level.toUpperCase()}] ${message}\n`;
@@ -159,15 +160,19 @@ class Logger {
    * @param {"warning" | "error" | "critical"} level The severity level of the error, defaults to 'error'
    * @param {string} message The message before the stack trace, defaults to 'an error occurred'
    */
-  async addErrorMessage(error, level = "error", message = "An error occurred!") {
+  async addError(error, level = "error", message = "An error occurred!") {
     if (!(await this.#fileExists(this.logPath))) await this.createLogFile();
 
     const line = [
       `[${this.#formatTime()}] [${level.toUpperCase()}] ${message}`,
       "",
       "--- BEGIN ERROR MESSAGE ---",
+      "",
       `${error.stack ?? error.message}`,
-      "--- END ERROR MESSAGE ---\n\n",
+      "",
+      "--- END ERROR MESSAGE ---",
+      "",
+      "",
     ].join("\n");
 
     await fs.appendFile(this.logPath, line, "utf-8");

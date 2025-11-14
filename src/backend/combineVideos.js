@@ -4,9 +4,7 @@ const { execFile } = require("child_process");
 const path = require("path");
 const ffmpegPath = require("ffmpeg-static");
 
-const { getConfig } = require("./config.js");
-const getVideoDetails = require("./selectVideo.js");
-const { selectVideos } = require("./utils.js");
+const { selectVideos, getVideoDetails } = require("./utils.js");
 
 /**
  * Sorts videos based on date/time in title.

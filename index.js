@@ -3,9 +3,13 @@ const path = require("path");
 
 const { getConfig, setConfig } = require("./src/backend/config.js");
 const { createAppMenu, updateCancelMenuItems } = require("./src/backend/menu.js");
-const getVideoDetails = require("./src/backend/selectVideo.js");
 const { getTokens, getClientSecrets } = require("./src/backend/auth/googleAuth.js");
-const { videoExists, confirmCloseApp, shutDownComputer } = require("./src/backend/utils.js");
+const {
+  getVideoDetails,
+  videoExists,
+  confirmCloseApp,
+  shutDownComputer,
+} = require("./src/backend/utils.js");
 const Upload = require("./src/backend/upload.js");
 const QueueManager = require("./src/backend/queue.js");
 const logger = require("./src/backend/logging/loggerSingleton.js");
@@ -81,10 +85,12 @@ const createWindow = () => {
 app.whenReady().then(async () => {
   try {
     await logger.createLogFile();
-    await logger.addLogMessage("Successfully created log file");
+    await logger.addLog("Successfully created log file");
 
     const config = getConfig();
     createWindow();
+
+    await logger.addLog("Obtained config file and created main window");
 
     // For notifications
     if (process.platform === "win32") {
@@ -93,6 +99,14 @@ app.whenReady().then(async () => {
 
     tokens = await getTokens(win);
     clientSecrets = getClientSecrets();
+
+    await logger.addLog("Obtained tokens and client secrets");
+
+    // For debugging https://github.com/viradex/games-uploader/issues/4
+    await logger.addLog(
+      `Config checkboxes states: 'Don't show completion notifications' is ${config.dontShowCompletionNotification} and 'Shut down on completion' is ${config.shutDownOnComplete}`,
+      "debug"
+    );
 
     // Once the webpage has loaded, update checkboxes to whatever the config is
     win.webContents.on("did-finish-load", () => {
@@ -105,7 +119,7 @@ app.whenReady().then(async () => {
     console.log("An unexpected error occurred!");
     console.log(err);
 
-    logger.addErrorMessage(err, "critical", err.message);
+    logger.addError(err, "critical", err.message);
     app.quit();
   }
 });
@@ -162,7 +176,7 @@ ipcMain.handle("show-dialog", async (event, options) => {
 });
 
 app.on("before-quit", async () => {
-  await logger.addLogMessage("Stopping application...");
+  await logger.addLog("Stopping application...");
 });
 
 app.on("will-quit", async () => {

@@ -4,6 +4,7 @@ const { google } = require("googleapis");
 
 const { refreshAccessToken } = require("./auth/googleAuth.js");
 const { getConfig } = require("./config.js");
+const getDetails = require("./getDetails.js");
 
 /**
  * Pauses execution for a given number of milliseconds.
@@ -38,6 +39,31 @@ const selectVideos = async (title, buttonName = "OK") => {
   // If prompt was canceled or no files were selected, return empty array
   if (files.canceled || !files.filePaths.length) return [];
   else return files.filePaths;
+};
+
+/**
+ * Gathers information about multiple videos and sends to UI.
+ *
+ * @param {any} win Main BrowserWindow instance
+ * @param {string[]} videos Optionally, a list of pre-selected videos. If not provided, requests the user for videos
+ */
+const getVideoDetails = async (win, videos = []) => {
+  // Gets videos if none were passed
+  if (!videos.length) {
+    videos = await selectVideos("Select videos to upload", "Upload");
+  }
+
+  const details = [];
+
+  // Use for..of instead of forEach due to async functions
+  for (const video of videos) {
+    const info = await getDetails(video);
+    details.push(info);
+  }
+
+  // If any videos were processed, send details to renderer
+  if (!details.length) return;
+  win.webContents.send("video-details", details);
 };
 
 /**
@@ -199,4 +225,11 @@ const shutDownComputer = async (win, seconds = 60) => {
   }
 };
 
-module.exports = { sleep, selectVideos, videoExists, confirmCloseApp, shutDownComputer };
+module.exports = {
+  sleep,
+  selectVideos,
+  getVideoDetails,
+  videoExists,
+  confirmCloseApp,
+  shutDownComputer,
+};
