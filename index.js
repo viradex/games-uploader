@@ -8,6 +8,7 @@ const { getTokens, getClientSecrets } = require("./src/backend/auth/googleAuth.j
 const { videoExists, confirmCloseApp, shutDownComputer } = require("./src/backend/utils.js");
 const Upload = require("./src/backend/upload.js");
 const QueueManager = require("./src/backend/queue.js");
+const logger = require("./src/backend/logging/loggerSingleton.js");
 
 /**
  * Main window reference for dialogs (instance of `BrowserWindow`)
@@ -79,6 +80,9 @@ const createWindow = () => {
 
 app.whenReady().then(async () => {
   try {
+    await logger.createLogFile();
+    await logger.addLogMessage("Successfully created log file");
+
     const config = getConfig();
     createWindow();
 
@@ -100,6 +104,8 @@ app.whenReady().then(async () => {
   } catch (err) {
     console.log("An unexpected error occurred!");
     console.log(err);
+
+    logger.addErrorMessage(err, "critical", err.message);
     app.quit();
   }
 });
@@ -153,6 +159,14 @@ ipcMain.handle("show-dialog", async (event, options) => {
   // Show message box dialog for renderer, since it cannot access Electron methods
   const result = await dialog.showMessageBox(win, options);
   return result;
+});
+
+app.on("before-quit", async () => {
+  await logger.addLogMessage("Stopping application...");
+});
+
+app.on("will-quit", async () => {
+  await logger.endLogFile();
 });
 
 app.on("window-all-closed", () => {

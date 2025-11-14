@@ -7,7 +7,6 @@ const { google } = require("googleapis");
 const { getConfig } = require("../config.js");
 
 const userDataPath = app.getPath("userData");
-const userEnteredSecretsPath = getConfig().clientSecretsPath;
 
 /**
  * Redirect port for Google sign-in
@@ -25,9 +24,15 @@ const REDIRECT_URI = `http://127.0.0.1:${REDIRECT_PORT}`;
 const TOKEN_PATH = path.join(userDataPath, "token.json");
 
 /**
- * Absolute path to client secrets JSON file. Relies on a `config.json` value.
+ * Fixes uncaught error if config doesn't exist
+ *
+ * @returns Path to user client secrets
  */
-const CLIENT_SECRETS_PATH = path.join(process.cwd(), userEnteredSecretsPath);
+const getClientSecretsPath = () => {
+  const userEnteredSecretsPath = getConfig().clientSecretsPath;
+  if (!userEnteredSecretsPath) return null;
+  return path.join(process.cwd(), userEnteredSecretsPath);
+};
 
 /**
  * Runs the first path of an OAuth 2.0 flow for YouTube API access.
@@ -35,6 +40,8 @@ const CLIENT_SECRETS_PATH = path.join(process.cwd(), userEnteredSecretsPath);
  * @returns {Promise<string | Error>} Promise with either an `Error` or the code
  */
 const startOAuthFlow = async () => {
+  const CLIENT_SECRETS_PATH = getClientSecretsPath();
+
   const creds = JSON.parse(fs.readFileSync(CLIENT_SECRETS_PATH, "utf8")).installed;
   const clientId = creds.client_id;
 
@@ -108,6 +115,7 @@ const getSavedTokens = () => {
  * @returns {Object | null} The client secrets as an object, or `null` if failed
  */
 const getClientSecrets = () => {
+  const CLIENT_SECRETS_PATH = getClientSecretsPath();
   if (!fs.existsSync(CLIENT_SECRETS_PATH)) return null;
 
   try {
@@ -145,6 +153,7 @@ const tokensExpired = (tokens) => {
  * @throws Error if no authorization code was provided, or if the token exchange failed
  */
 const exchangeCodeForTokens = async (code) => {
+  const CLIENT_SECRETS_PATH = getClientSecretsPath();
   if (!code) throw new Error("No authorization code provided");
 
   // Reads client secrets to get body for request
@@ -183,6 +192,7 @@ const exchangeCodeForTokens = async (code) => {
  * @throws Error if no refresh token is the token, or if the token refresh failed
  */
 const refreshAccessToken = async (tokens) => {
+  const CLIENT_SECRETS_PATH = getClientSecretsPath();
   if (!tokens.refresh_token) throw new Error("No refresh token available");
 
   // Reads client secrets to get body for request
@@ -222,6 +232,9 @@ const refreshAccessToken = async (tokens) => {
  * @throws Error if client secrets file could not be accessed
  */
 const getTokens = async (win) => {
+  const CLIENT_SECRETS_PATH = getClientSecretsPath();
+  const userEnteredSecretsPath = getConfig().clientSecretsPath;
+
   // Ensures the client secrets file exists and the user has entered a path in config.json
   if (!fs.existsSync(CLIENT_SECRETS_PATH) || !userEnteredSecretsPath) {
     await dialog.showMessageBox(win, {
