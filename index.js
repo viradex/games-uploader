@@ -35,6 +35,7 @@ let queueManager;
 
 /**
  * All uploads, referenced by UUID. All values are an instance of `Upload`.
+ * @type {Map<string, Upload>}
  */
 const uploads = new Map();
 

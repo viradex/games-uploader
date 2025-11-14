@@ -34,13 +34,49 @@ const confirmRemoval = async (win, multiple = false) => {
  * Builds and applies the top menu bar for the app.
  *
  * Format:
- * `File | View | Window`
+ * `File | Videos | Window`
  *
  * @param {any} win Instance of main BrowserWindow to apply menu bar to
  * @param {any} queueManager Instance of QueueManager
  */
 const createAppMenu = (win, queueManager) => {
   const menuTemplate = [
+    {
+      label: "File",
+      submenu: [
+        {
+          label: "View Logs",
+          click: async () => {
+            await dialog.showMessageBox(win, {
+              message: "This feature has not been implemented",
+              title: "Not Implemented",
+              type: "warning",
+              buttons: ["OK"],
+              defaultId: 0,
+            });
+          },
+        },
+        { type: "separator" },
+        {
+          label: "Settings",
+          click: async () => {
+            // Shows message explaining that settings must be edited manually
+            const result = await dialog.showMessageBox(win, {
+              message:
+                "Editing settings must be done manually in the config.json file. Would you like to open the file?\n\nFor more information on how to use this file, see the README.",
+              title: "Editing Settings",
+              type: "info",
+              buttons: ["OK", "Cancel"],
+              defaultId: 0,
+            });
+
+            // Opens file for user's convenience
+            if (result.response === 0) shell.openPath(path.join(process.cwd(), "config.json"));
+          },
+        },
+        { role: "quit" },
+      ],
+    },
     {
       label: "Videos",
       submenu: [
@@ -92,25 +128,6 @@ const createAppMenu = (win, queueManager) => {
             }
           },
         },
-        { type: "separator" },
-        {
-          label: "Settings",
-          click: async () => {
-            // Shows message explaining that settings must be edited manually
-            await dialog.showMessageBox(win, {
-              message:
-                "Editing settings must be done manually in the config.json file. Once this window is closed, the config.json file will open where you can edit settings.\n\nFor more information on how to use this file, see the README.",
-              title: "Editing Settings",
-              type: "info",
-              buttons: ["OK"],
-              defaultId: 0,
-            });
-
-            // Opens file for user's convenience
-            shell.openPath(path.join(process.cwd(), "config.json"));
-          },
-        },
-        { role: "quit" },
       ],
     },
     { role: "windowMenu" },
