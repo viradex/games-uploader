@@ -3,6 +3,7 @@ const path = require("path");
 
 const combineVideos = require("./combineVideos.js");
 const getVideoDetails = require("./selectVideo.js");
+const { createLogWindow } = require("./logging/initLogWin.js");
 
 /**
  * Instance of Menu
@@ -47,13 +48,7 @@ const createAppMenu = (win, queueManager) => {
         {
           label: "View Logs",
           click: async () => {
-            await dialog.showMessageBox(win, {
-              message: "This feature has not been implemented",
-              title: "Not Implemented",
-              type: "warning",
-              buttons: ["OK"],
-              defaultId: 0,
-            });
+            createLogWindow(win);
           },
         },
         { type: "separator" },

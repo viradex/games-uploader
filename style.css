@@ -21,8 +21,9 @@ body {
   gap: 12px;
 }
 
-/* Upload button */
-#uploadBtn {
+/* Upload and log buttons */
+#uploadBtn,
+#openLogBtn {
   width: 100%;
   height: 30px;
   background-color: #3c3c3c;
@@ -35,11 +36,17 @@ body {
   transition: background-color 0.2s, transform 0.1s;
 }
 
-#uploadBtn:hover {
+#openLogBtn {
+  width: 90%;
+}
+
+#uploadBtn:hover,
+#openLogBtn:hover {
   background-color: #4a4a4a;
 }
 
-#uploadBtn:active {
+#uploadBtn:active,
+#openLogBtn:active {
   transform: scale(0.98);
 }
 
@@ -251,4 +258,40 @@ body {
 
 .deleteBtn:hover {
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+#logContainer {
+  white-space: pre-wrap;
+  font: 13px Consolas, monospace;
+  width: 90%;
+  height: 400px;
+  max-height: 70vh;
+  min-height: 400px;
+  overflow-y: auto;
+  background-color: #000000;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  scrollbar-width: thin;
+  scrollbar-color: #252525 #2d2d2d;
+}
+
+#logContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+#logContainer::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+#logContainer::-webkit-scrollbar-thumb {
+  background-color: #252525;
+  border-radius: 4px;
+  border: 2px solid #2d2d2d;
+}
+
+#logContainer::-webkit-scrollbar-thumb:hover {
+  background-color: #3a3a3a;
 }
