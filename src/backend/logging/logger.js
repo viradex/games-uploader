@@ -6,11 +6,13 @@ class Logger {
    * Initializes the logger. Used to output verbose log messages to a log file.
    *
    * @param {string} logFile A specific filename for the log file. This can be created using the static `Logger.createLogFilename()` method
+   * @param {boolean} logToConsole Whether or not to log each line to stdout
    */
-  constructor(logFile) {
+  constructor(logFile, logToConsole = true) {
     this.logFile = logFile;
     this.logFolder = path.join(process.cwd(), "logs");
     this.logPath = path.join(this.logFolder, logFile);
+    this.logToConsole = logToConsole;
   }
 
   /**
@@ -150,6 +152,8 @@ class Logger {
     if (!(await this.#fileExists(this.logPath))) await this.createLogFile();
 
     const line = `[${this.#formatTime()}] [${level.toUpperCase()}] ${message}\n`;
+    if (this.logToConsole) console.log(line.trimEnd());
+
     await fs.appendFile(this.logPath, line, "utf-8");
   }
 
@@ -175,6 +179,7 @@ class Logger {
       "",
     ].join("\n");
 
+    if (this.logToConsole) console.log(line.trimEnd());
     await fs.appendFile(this.logPath, line, "utf-8");
   }
 }

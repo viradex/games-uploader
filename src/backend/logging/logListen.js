@@ -20,13 +20,15 @@ const watchLogs = (win) => {
     // Read entire log file once
     if (stats.size > 0) {
       fs.readFile(logger.logPath, "utf8", (err, data) => {
-        if (!err) {
+        if (!err && !win.isDestroyed()) {
           win.webContents.send("log-init", data);
         }
       });
     } else {
       // Send empty file
-      win.webContents.send("log-init", "");
+      if (!win.isDestroyed()) {
+        win.webContents.send("log-init", "");
+      }
     }
   });
 
@@ -52,7 +54,7 @@ const watchLogs = (win) => {
 
         // Send entire new file
         fs.readFile(logger.logPath, "utf8", (err, data) => {
-          if (!err) {
+          if (!err && !win.isDestroyed()) {
             win.webContents.send("log-init", data);
           }
         });
@@ -64,11 +66,13 @@ const watchLogs = (win) => {
       if (stats.size > lastSize) {
         const stream = fs.createReadStream(logger.logPath, {
           start: lastSize,
-          end: stats.size,
+          end: stats.size - 1,
         });
 
         stream.on("data", (chunk) => {
-          win.webContents.send("log-update", chunk.toString());
+          if (!win.isDestroyed()) {
+            win.webContents.send("log-update", chunk.toString());
+          }
         });
 
         lastSize = stats.size;
@@ -76,6 +80,10 @@ const watchLogs = (win) => {
     } catch (err) {
       console.log(err);
     }
+  });
+
+  win.on("closed", () => {
+    watcher.close();
   });
 };
 

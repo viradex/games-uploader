@@ -260,6 +260,7 @@ body {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Log container box */
 #logContainer {
   white-space: pre-wrap;
   font: 13px Consolas, monospace;

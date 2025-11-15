@@ -126,15 +126,21 @@ app.whenReady().then(async () => {
 
 // UI sends request to upload video
 ipcMain.on("select-video", async (event) => {
+  await logger.addLog("Received 'select video' request");
   getVideoDetails(win);
 });
 
 ipcMain.on("start-upload", async (event, details) => {
   // Gets the number of videos the user wishes to check
+  await logger.addLog("Received 'start upload' request");
   const videoCheckLimit = getConfig().videoCheckLimit;
+
   if (videoCheckLimit >= 1) {
+    await logger.addLog(`Checking if video with title "${details.title}" exists...`);
     const exists = await videoExists(tokens, details.title, win, videoCheckLimit);
+
     if (exists) {
+      await logger.addLog(`Sending 'remove upload' request for video with UUID ${details.uuid}`);
       win.webContents.send("remove-upload", details.uuid);
       return;
     }
@@ -157,15 +163,21 @@ ipcMain.on("start-upload", async (event, details) => {
   // Adds a new value to the Map and queue manager
   uploads.set(details.uuid, uploadInstance);
   queueManager.add(uploadInstance);
+
+  await logger.addLog(
+    `Successfully added video to queue with title "${details.title}" and UUID ${details.uuid}`
+  );
 });
 
 // UI sends request to cancel upload
 ipcMain.on("cancel-upload", async (event, uuid) => {
+  await logger.addLog("Received 'cancel upload' request");
   queueManager.cancelSpecific(uuid);
 });
 
-ipcMain.on("update-config", (event, newValues) => {
+ipcMain.on("update-config", async (event, newValues) => {
   // When checkboxes change
+  await logger.addLog("Received 'update config' request for checkboxes");
   setConfig(newValues);
 });
 
