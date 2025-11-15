@@ -176,4 +176,4 @@ The status is a brief summary of what is happening to the YouTube upload. It can
 | Processing on YouTube...              | The video is being added to the playlist     |
 | Completed upload!                     | The video has been successfully uploaded     |
 | Upload failed                         | The upload failed (details in message box)   |
-| Cancelled upload                      | The upload was canceled by the user          |
+| Canceled upload                       | The upload was canceled by the user          |

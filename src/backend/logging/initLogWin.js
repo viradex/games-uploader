@@ -51,6 +51,7 @@ const createLogWindow = (parent) => {
 };
 
 ipcMain.on("open-log", async (event) => {
+  await logger.addLog("Received 'open log' request");
   shell.openPath(logger.logPath);
 });
 

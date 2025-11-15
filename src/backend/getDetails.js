@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const ffmpegPath = require("ffmpeg-static");
 
 const { getConfig } = require("./config.js");
+const logger = require("./logging/loggerSingleton.js");
 
 /**
  * Receives a video filename and attempts to convert it into a clean, readable title.
@@ -21,7 +22,9 @@ const { getConfig } = require("./config.js");
  * @param {string} filename The filename to convert
  * @returns {string} The newly formatted title
  */
-const parseVideoTitle = (filename) => {
+const parseVideoTitle = async (filename) => {
+  await logger.addLog(`Parsing video title from filename: ${filename}`);
+
   // Remove file extension
   filename = filename.replace(/\.[^/.]+$/, "");
 
@@ -38,7 +41,10 @@ const parseVideoTitle = (filename) => {
         6,
         8
       )} ${dateStr.slice(8, 10)}:${dateStr.slice(10, 12)}:${dateStr.slice(12, 14)}`;
-      return `${game} ${formattedDate}`;
+
+      const result = `${game} ${formattedDate}`;
+      await logger.addLog(`Parsed MedalTV title: ${result}`);
+      return result;
     }
   }
 
@@ -47,7 +53,10 @@ const parseVideoTitle = (filename) => {
   if (recordingMatch) {
     const datePart = recordingMatch[1].replace(/-/g, "/"); // Replaces dashes in date to slashes
     const timePart = recordingMatch[2].replace(/-/g, ":"); // Replaces dashes in time to colons
-    return `Recording ${datePart} ${timePart}`;
+    const result = `Recording ${datePart} ${timePart}`;
+
+    await logger.addLog(`Parsed OBS recording title: ${result}`);
+    return result;
   }
 
   // Case 3: Mobile game recorder
@@ -58,9 +67,13 @@ const parseVideoTitle = (filename) => {
 
     const dateParts = dateStr.split("-"); // Both time and dates are split only by dashes
     const formatted = `${dateParts[0]}/${dateParts[1]}/${dateParts[2]} ${dateParts[3]}:${dateParts[4]}:${dateParts[5]}`;
-    return `${gameName} ${formatted}`;
+    const result = `${gameName} ${formatted}`;
+
+    await logger.addLog(`Parsed mobile recorder title: ${result}`);
+    return result;
   }
 
+  await logger.addLog(`No parsing match, returning raw filename as title: ${filename}`);
   return filename;
 };
 
@@ -73,10 +86,12 @@ const parseVideoTitle = (filename) => {
  * @param {string} filePath The path to the video file to check the duration of
  * @returns {Promise<string | Error>} The formatted duration or an error if the parsing failed
  */
-const getVideoDuration = (filePath) => {
+const getVideoDuration = async (filePath) => {
+  await logger.addLog(`Fetching video duration for: ${filePath}`);
+
   return new Promise((resolve, reject) => {
     // Executes FFmpeg binary with -i flag for information
-    execFile(ffmpegPath, ["-i", filePath], (err, stdout, stderr) => {
+    execFile(ffmpegPath, ["-i", filePath], async (err, stdout, stderr) => {
       // FFmpeg prints duration in stderr rather than stdout
       const match = stderr.match(/Duration: (\d{2}):(\d{2}):(\d{2}\.\d+)/);
 
@@ -86,14 +101,16 @@ const getVideoDuration = (filePath) => {
         const minutes = parseInt(match[2]);
         const seconds = parseFloat(match[3]);
 
-        // Directly format into string
         const hh = hours;
         const mm = String(minutes).padStart(2, "0");
         const ss = String(Math.floor(seconds)).padStart(2, "0");
 
-        // Gives different formats depending on hours
-        resolve(hours > 0 ? `${hh}:${mm}:${ss}` : `${mm}:${ss}`);
+        const result = hours > 0 ? `${hh}:${mm}:${ss}` : `${mm}:${ss}`;
+
+        await logger.addLog(`Parsed video duration: ${result}`);
+        resolve(result);
       } else {
+        await logger.addLog("Failed to parse video duration", "error");
         reject(new Error("Could not parse duration"));
       }
     });
@@ -107,8 +124,13 @@ const getVideoDuration = (filePath) => {
  * @returns {Promise<string>} The size of the file in megabytes
  */
 const getSize = async (filePath) => {
+  await logger.addLog(`Getting file size for: ${filePath}`);
+
   const stats = await fs.stat(filePath);
-  return (stats.size / (1024 * 1024)).toFixed(2);
+  const size = (stats.size / (1024 * 1024)).toFixed(2);
+
+  await logger.addLog(`File size: ${size} MB`);
+  return size;
 };
 
 /**
@@ -128,7 +150,9 @@ const getSize = async (filePath) => {
  * @param {Object} config The entire configuration object
  * @returns The playlist ID the video belongs to based on the config
  */
-const getPlaylist = (title, config) => {
+const getPlaylist = async (title, config) => {
+  await logger.addLog(`Selecting playlist for title: ${title}`);
+
   const playlists = config.playlists;
 
   // Gets the year and month from the date pattern
@@ -143,6 +167,7 @@ const getPlaylist = (title, config) => {
     }
   }
 
+  await logger.addLog(`Playlist selected: ${playlistID || "None (default)"}`);
   return playlistID;
 };
 
@@ -161,13 +186,21 @@ const getPlaylist = (title, config) => {
  * @returns {{videoPath: string, uuid: string, filename: string, title: string, duration: string, totalSize: string, playlist: string }} Retrieved details of file
  */
 const getDetails = async (videoPath) => {
-  const uuid = crypto.randomUUID(); // For identifying different upload cards from each other
+  await logger.addLog(`Getting details for: ${path.basename(videoPath)}`);
+
+  const uuid = crypto.randomUUID();
+  await logger.addLog(`Generated UUID: ${uuid}`);
+
   const filename = path.basename(videoPath);
-  const title = parseVideoTitle(filename);
+  await logger.addLog(`Extracted filename: ${filename}`);
+
+  const title = await parseVideoTitle(filename);
 
   const duration = await getVideoDuration(videoPath);
   const totalSize = await getSize(videoPath);
-  const playlist = getPlaylist(title, getConfig());
+  const playlist = await getPlaylist(title, getConfig());
+
+  await logger.addLog(`Finished gathering video metadata for: ${filename}`);
 
   return {
     videoPath,

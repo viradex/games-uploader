@@ -5,6 +5,7 @@ const path = require("path");
 const ffmpegPath = require("ffmpeg-static");
 
 const { selectVideos, getVideoDetails } = require("./utils.js");
+const logger = require("./logging/loggerSingleton.js");
 
 /**
  * Sorts videos based on date/time in title.
@@ -36,24 +37,18 @@ const sortVideos = (videos) => {
  * @returns {Object | void} The error if failed, else nothing
  */
 const concatVideos = async (fileListPath, outputPath) => {
+  await logger.addLog(`Starting FFmpeg concatenation to: ${outputPath}`);
+
   return new Promise((resolve, reject) => {
     execFile(
       ffmpegPath,
-      [
-        "-v",
-        "error", // Suppress warnings and info messages
-        "-f",
-        "concat",
-        "-safe",
-        "0",
-        "-i",
-        fileListPath,
-        "-c",
-        "copy",
-        outputPath,
-      ],
-      (err) => {
-        if (err) return reject(err);
+      ["-v", "error", "-f", "concat", "-safe", "0", "-i", fileListPath, "-c", "copy", outputPath],
+      async (err) => {
+        if (err) {
+          await logger.addLog(`FFmpeg concatenation failed: ${err.message}`, "error");
+          return reject(err);
+        }
+        await logger.addLog(`FFmpeg concatenation completed: ${outputPath}`);
         resolve();
       }
     );
@@ -71,6 +66,7 @@ const combineVideos = async (win) => {
   if (!files.length) {
     return;
   } else if (files.length === 1) {
+    await logger.addLog("Only one video selected, cannot combine", "warning");
     await dialog.showMessageBox(win, {
       message: "At least two videos must be selected to be combined.",
       title: "Too Few Videos Selected",
@@ -82,8 +78,9 @@ const combineVideos = async (win) => {
     return;
   }
 
-  // Sort files based on filename date/time
+  await logger.addLog(`Selected ${files.length} videos for combination`);
   const sortedFiles = sortVideos(files);
+  await logger.addLog(`Sorted videos: ${sortedFiles.join(", ")}`);
 
   // Prepare settings for FFmpeg
   const videosFolder = path.dirname(sortedFiles[0]);
@@ -94,19 +91,29 @@ const combineVideos = async (win) => {
     const text = `file '${file}'\n`;
     await fs.appendFile(fileListPath, text);
   }
+  await logger.addLog(`Created temporary FFmpeg file list: ${fileListPath}`);
 
   // Final combined file name and location for FFmpeg, and combine videos
   const combinedFile = path.join(videosFolder, "combined.mp4");
-  await concatVideos(fileListPath, combinedFile);
+  try {
+    await concatVideos(fileListPath, combinedFile);
+  } catch (err) {
+    await logger.addError(err, "error");
+    return;
+  }
 
   // Remove temporary text file and original videos
   await fs.rm(fileListPath);
+  await logger.addLog(`Deleted temporary file list: ${fileListPath}`);
+
   for (const file of sortedFiles) {
     await fs.rm(file);
+    await logger.addLog(`Deleted original video: ${file}`);
   }
 
   // Rename combined video to oldest original video
   await fs.rename(combinedFile, sortedFiles[0]);
+  await logger.addLog(`Renamed combined video to: ${path.basename(sortedFiles[0])}`);
 
   // Confirm uploading the new combined video
   const uploadConfirm = await dialog.showMessageBox(win, {
@@ -120,6 +127,7 @@ const combineVideos = async (win) => {
   });
 
   if (uploadConfirm.response === 0) {
+    await logger.addLog(`Uploading video...`);
     await getVideoDetails(win, [sortedFiles[0]]);
   }
 };

@@ -116,9 +116,6 @@ app.whenReady().then(async () => {
       });
     });
   } catch (err) {
-    console.log("An unexpected error occurred!");
-    console.log(err);
-
     logger.addError(err, "critical", err.message);
     app.quit();
   }
@@ -162,7 +159,7 @@ ipcMain.on("start-upload", async (event, details) => {
 
   // Adds a new value to the Map and queue manager
   uploads.set(details.uuid, uploadInstance);
-  queueManager.add(uploadInstance);
+  await queueManager.add(uploadInstance);
 
   await logger.addLog(
     `Successfully added video to queue with title "${details.title}" and UUID ${details.uuid}`
@@ -172,7 +169,7 @@ ipcMain.on("start-upload", async (event, details) => {
 // UI sends request to cancel upload
 ipcMain.on("cancel-upload", async (event, uuid) => {
   await logger.addLog("Received 'cancel upload' request");
-  queueManager.cancelSpecific(uuid);
+  await queueManager.cancelSpecific(uuid);
 });
 
 ipcMain.on("update-config", async (event, newValues) => {

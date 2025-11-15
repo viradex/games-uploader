@@ -1,3 +1,5 @@
+const logger = require("./logging/loggerSingleton.js");
+
 class QueueManager {
   /**
    * Manages the queue system, holding pending uploads in a queue and only allowing one upload at a time.
@@ -26,10 +28,11 @@ class QueueManager {
    *
    * @param {any} upload Instance of `Upload`
    */
-  add(upload) {
+  async add(upload) {
     // Add to end of queue and callback
     this.queue.push(upload);
     this.queueChangeCallback(this.queue, !!this.current);
+    await logger.addLog(`Added upload with UUID ${upload.uuid} to queue`);
 
     if (this.win && !this.win.isDestroyed()) {
       // Requests frontend to create new upload card
@@ -60,6 +63,7 @@ class QueueManager {
     this.isProcessing = true;
     this.current = this.queue.shift();
     this.queueChangeCallback(this.queue, !!this.current);
+    await logger.addLog(`Starting next upload (UUID ${this.current.uuid})`);
 
     try {
       // Starts the upload (uses function from Upload class)
@@ -70,8 +74,11 @@ class QueueManager {
     } catch (err) {
       // Logs failed errors
       // Dialog errors are handled in Upload class
-      console.log(`Upload failed for video "${this.current.title}" with UUID ${this.current.uuid}`);
-      console.log(err);
+      await logger.addError(
+        err,
+        "error",
+        `Upload failed for video "${this.current.title}" with UUID ${this.current.uuid}`
+      );
     } finally {
       // Cleanup after upload, removing from Map and UI
       if (this.current) {
@@ -79,6 +86,7 @@ class QueueManager {
         if (this.win && !this.win.isDestroyed()) {
           this.win.webContents.send("remove-upload", this.current.uuid);
         }
+        await logger.addLog(`Removed upload with UUID ${this.current.uuid} from queue and UI`);
       }
     }
 
@@ -94,8 +102,8 @@ class QueueManager {
   /**
    * Cancels only the upload currently in progress.
    */
-  cancelCurrent() {
-    if (this.current) this.current.cancel();
+  async cancelCurrent() {
+    if (this.current) await this.current.cancel();
   }
 
   /**
@@ -119,20 +127,25 @@ class QueueManager {
    *
    * @param {string} uuid The unique identifier for the upload.
    */
-  cancelSpecific(uuid) {
+  async cancelSpecific(uuid) {
     if (this.current && this.current.uuid === uuid) {
-      this.cancelCurrent();
+      await logger.addLog(
+        "Determined that the upload to be canceled is currently working, attempting cancelation"
+      );
+      await this.cancelCurrent();
       return;
     }
 
-    // Prevents a race condition when cancelling the first element in
+    // Prevents a race condition when canceling the first element in
     // queue during an ongoing upload (where this.current is not null)
     for (const [index, upload] of this.queue.entries()) {
       // Finds a matching UUID, then removes it from queue and UI, notifying callback
       if (upload.uuid === uuid) {
-        upload.cancel();
+        await upload.cancel();
         const canceledUpload = this.queue.splice(index, 1)[0];
         this.queueChangeCallback(this.queue, !!this.current);
+
+        await logger.addLog(`Found upload with UUID ${uuid} and canceled it`);
 
         if (this.win && !this.win.isDestroyed()) {
           this.win.webContents.send("upload-progress", {
@@ -145,6 +158,7 @@ class QueueManager {
           });
 
           this.win.webContents.send("remove-upload", canceledUpload.uuid);
+          await logger.addLog("Removed upload from UI");
         }
         break;
       }
@@ -154,8 +168,8 @@ class QueueManager {
   /**
    * Cancels everything, both the active and pending uploads.
    */
-  cancelAll() {
-    this.cancelCurrent();
+  async cancelAll() {
+    await this.cancelCurrent();
     this.cancelAllPending();
   }
 

@@ -4,6 +4,7 @@ const path = require("path");
 const combineVideos = require("./combineVideos.js");
 const { getVideoDetails } = require("./utils.js");
 const { createLogWindow } = require("./logging/initLogWin.js");
+const logger = require("./logging/loggerSingleton.js");
 
 /**
  * Instance of Menu
@@ -12,13 +13,15 @@ const { createLogWindow } = require("./logging/initLogWin.js");
 let menu;
 
 /**
- * Confirm cancelling uploads of video(s).
+ * Confirm canceling uploads of video(s).
  *
  * @param {any} win Instance of main BrowserWindow
  * @param {boolean} multiple Whether or not the text should change to be grammatically correct for multiple videos. Defaults to `false`
- * @returns A boolean that is `true` if the user accepted cancelling uploads
+ * @returns A boolean that is `true` if the user accepted canceling uploads
  */
 const confirmRemoval = async (win, multiple = false) => {
+  await logger.addLog(`Prompting user to cancel ${multiple ? "multiple" : "single"} upload(s)`);
+
   const result = await dialog.showMessageBox(win, {
     message: `Are you sure you want to cancel ${
       multiple ? "these uploads" : "this upload"
@@ -27,6 +30,8 @@ const confirmRemoval = async (win, multiple = false) => {
     buttons: ["OK", "Cancel"],
     title: "Cancel Upload",
   });
+
+  await logger.addLog(`User selected: ${result.response === 0 ? "Confirm cancel" : "Cancel"}`);
 
   return result.response === 0;
 };
@@ -48,6 +53,7 @@ const createAppMenu = (win, queueManager) => {
         {
           label: "View Logs",
           click: async () => {
+            await logger.addLog("User opened log window");
             createLogWindow(win);
           },
         },
@@ -55,6 +61,8 @@ const createAppMenu = (win, queueManager) => {
         {
           label: "Settings",
           click: async () => {
+            await logger.addLog("User opened Settings dialog");
+
             // Shows message explaining that settings must be edited manually
             const result = await dialog.showMessageBox(win, {
               message:
@@ -65,8 +73,9 @@ const createAppMenu = (win, queueManager) => {
               defaultId: 0,
             });
 
-            // Opens file for user's convenience
-            if (result.response === 0) shell.openPath(path.join(process.cwd(), "config.json"));
+            const configPath = path.join(process.cwd(), "config.json");
+            await logger.addLog(`Opening config.json at: ${configPath}`);
+            shell.openPath(configPath);
           },
         },
         { role: "quit" },
@@ -78,14 +87,14 @@ const createAppMenu = (win, queueManager) => {
         {
           label: "Upload Videos",
           click: async () => {
-            // Opens file selection and starts upload process
+            await logger.addLog("User selected: Upload Videos");
             await getVideoDetails(win);
           },
         },
         {
           label: "Combine Videos",
           click: async () => {
-            // Opens file selection and merges clips with FFmpeg, optionally allowing uploads
+            await logger.addLog("User selected: Combine Videos");
             await combineVideos(win);
           },
         },
@@ -95,9 +104,11 @@ const createAppMenu = (win, queueManager) => {
           id: "cancel-current",
           enabled: false,
           click: async () => {
-            // Disabled by default; when an upload is in progress, cancels the current upload
+            await logger.addLog("User clicked: Cancel Current Upload");
+
             if (await confirmRemoval(win)) {
-              queueManager.cancelCurrent();
+              await logger.addLog("Confirmed: cancel current upload");
+              await queueManager.cancelCurrent();
             }
           },
         },
@@ -106,8 +117,10 @@ const createAppMenu = (win, queueManager) => {
           id: "cancel-pending",
           enabled: false,
           click: async () => {
-            // Disabled by default; when uploads are in queue, cancels all uploads other than current uploading one
-            if (await confirmRemoval(win)) {
+            await logger.addLog("User clicked: Cancel Pending Uploads");
+
+            if (await confirmRemoval(win, true)) {
+              await logger.addLog("Confirmed: cancel pending uploads");
               queueManager.cancelAllPending();
             }
           },
@@ -117,9 +130,11 @@ const createAppMenu = (win, queueManager) => {
           id: "cancel-all",
           enabled: false,
           click: async () => {
-            // Disabled by default; when any upload is in queue or uploading, cancels both
-            if (await confirmRemoval(win)) {
-              queueManager.cancelAll();
+            await logger.addLog("User clicked: Cancel All Uploads");
+
+            if (await confirmRemoval(win, true)) {
+              await logger.addLog("Confirmed: cancel all uploads");
+              await queueManager.cancelAll();
             }
           },
         },
@@ -128,7 +143,6 @@ const createAppMenu = (win, queueManager) => {
     { role: "windowMenu" },
   ];
 
-  // Set as app's global menu bar
   menu = Menu.buildFromTemplate(menuTemplate);
   Menu.setApplicationMenu(menu);
 };
@@ -136,25 +150,25 @@ const createAppMenu = (win, queueManager) => {
 /**
  * Updates the enabled/disabled state of certain menu items in the menu app bar (the _Cancel Upload_ options).
  *
- * Ensures the state reflects the current progress of uploads:
- * - If there is a current upload: _Cancel Current Upload_
- * - If there are uploads in queue: _Cancel Pending Uploads_
- * - If there are multiple uploads, whether or not in current or pending: _Cancel All Uploads_
- *
- * Disables options once these are no longer the case as well.
- *
  * @param {any} queueManager Instance of QueueManager
  * @param {any[]} queue Array of Upload instances, excluding currently uploading one
  * @param {boolean} current Whether or not there is a current upload
  */
 const updateCancelMenuItems = (queueManager, queue, current) => {
-  // If the app hasn't built the menu yet
   if (!menu) return;
 
-  // Enable/disable certain selections depending on state, then set as menu bar
+  // is 'await' needed here?
+  logger.addLog(
+    `Updating cancel menu items: current=${current}, pending=${
+      queue.length
+    }, anyActiveOrPending=${queueManager.hasActiveOrPendingUploads()}`,
+    "debug"
+  );
+
   menu.getMenuItemById("cancel-current").enabled = current;
   menu.getMenuItemById("cancel-pending").enabled = queue.length > 0;
   menu.getMenuItemById("cancel-all").enabled = queueManager.hasActiveOrPendingUploads();
+
   Menu.setApplicationMenu(menu);
 };
 

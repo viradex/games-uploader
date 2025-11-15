@@ -179,7 +179,7 @@ class Logger {
       "",
     ].join("\n");
 
-    if (this.logToConsole) console.log(line.trimEnd());
+    if (this.logToConsole) console.log(line);
     await fs.appendFile(this.logPath, line, "utf-8");
   }
 }

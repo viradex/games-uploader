@@ -5,6 +5,7 @@ const path = require("path");
 
 const { refreshAccessToken } = require("./auth/googleAuth.js");
 const { getConfig } = require("./config.js");
+const logger = require("./logging/loggerSingleton.js");
 
 class Upload {
   /**
@@ -90,6 +91,8 @@ class Upload {
     );
     oauth2Client.setCredentials(this.tokens);
 
+    await logger.addLog("Finished setting up OAuth2 credentials for YouTube API");
+
     return google.youtube({ version: "v3", auth: oauth2Client });
   }
 
@@ -153,6 +156,9 @@ class Upload {
    */
   async startUpload(progressCallback) {
     try {
+      await logger.addLog(
+        `The video "${this.title}" (UUID ${this.uuid}) is in authentication phase`
+      );
       this.status = "auth";
       this.#emit(progressCallback, { eta: "..." });
 
@@ -160,10 +166,11 @@ class Upload {
       const youtube = await this.#initOAuth();
       await youtube.channels.list({ part: "snippet", mine: true });
 
+      await logger.addLog(`The video "${this.title}" (UUID ${this.uuid}) is in uploading phase`);
       this.status = "upload";
       this.#emit(progressCallback, { eta: "..." });
 
-      // Prepare upload tracking and cancellation
+      // Prepare upload tracking and cancelation
       let uploadedBytes = 0;
       const start = Date.now();
       this.abortController = new AbortController();
@@ -173,6 +180,7 @@ class Upload {
       const minInterval = 200;
 
       // Sends video file to YouTube
+      await logger.addLog(`Sending video "${this.title}" to YouTube...`);
       const res = await youtube.videos.insert(
         {
           part: "snippet,status",
@@ -189,7 +197,7 @@ class Upload {
             uploadedBytes = evt.bytesRead;
             const now = Date.now();
 
-            // Only updates the ETA as often as defined in 'minInterval'
+            // Only updates as often as defined in 'minInterval'
             if (now - lastEmit >= minInterval || uploadedBytes === this.totalSize * 1024 * 1024) {
               const { speed, eta } = this.#calculateProgress(uploadedBytes, start);
               this.#emit(progressCallback, { speed, eta });
@@ -199,6 +207,7 @@ class Upload {
         }
       );
 
+      await logger.addLog(`The video "${this.title}" (UUID ${this.uuid}) is in processing phase`);
       this.status = "process";
       this.#emit(progressCallback, { sizeDone: this.totalSize, eta: "—" });
 
@@ -206,6 +215,9 @@ class Upload {
 
       // If playlist ID provided, add video to playlist
       if (this.playlist) {
+        await logger.addLog(
+          `Adding video "${this.title}" (UUID ${this.uuid}) to the playlist ${this.playlist}`
+        );
         await youtube.playlistItems.insert({
           part: "snippet",
           requestBody: {
@@ -218,6 +230,7 @@ class Upload {
       }
 
       // Mark upload as completed
+      await logger.addLog(`The video "${this.title}" (UUID ${this.uuid}) has completed the upload`);
       this.status = "complete";
       this.percentDone = 100;
       this.sizeDone = this.totalSize * 1024 * 1024;
@@ -225,6 +238,7 @@ class Upload {
 
       // Show system notification if allowed
       if (!getConfig().dontShowCompletionNotification) {
+        await logger.addLog("Showing completion notification...");
         new Notification({
           title: "Upload Complete",
           body: `Successfully uploaded the video "${this.title}"`,
@@ -238,6 +252,7 @@ class Upload {
       if (err.message.toLowerCase() === "the operation was aborted.") {
         // Not really a good check, but err.code doesn't work
         // If the operation was canceled by user
+        await logger.addLog(`The video "${this.title}" (UUID ${this.uuid}) has been canceled`);
         this.status = "cancel";
         this.#emit(progressCallback);
       } else {
@@ -256,8 +271,11 @@ class Upload {
           buttons: ["OK"],
         });
 
-        console.log(`Uploading the video ${this.title} with UUID of ${this.uuid} has failed!`);
-        console.log(err);
+        await logger.addError(
+          err,
+          "error",
+          `Uploading the video ${this.title} with UUID of ${this.uuid} has failed!`
+        );
       }
 
       return false;
@@ -267,11 +285,12 @@ class Upload {
   /**
    * Stops an ongoing upload immediately, if it is running.
    */
-  cancel() {
+  async cancel() {
     // Checks if upload is running, only then can it be canceled
     if (this.abortController) {
       this.abortController.abort();
       this.status = "cancel";
+      await logger.addLog(`Stopped upload of video ${this.title} (UUID ${this.uuid})`);
     }
   }
 }

@@ -5,6 +5,7 @@ const { google } = require("googleapis");
 const { refreshAccessToken } = require("./auth/googleAuth.js");
 const { getConfig } = require("./config.js");
 const getDetails = require("./getDetails.js");
+const logger = require("./logging/loggerSingleton.js");
 
 /**
  * Pauses execution for a given number of milliseconds.
@@ -28,6 +29,7 @@ const selectVideos = async (title, buttonName = "OK") => {
   // Gets default directory from configuration, or the previously opened folder
   const defaultPath = getConfig().defaultDirectory || "";
 
+  await logger.addLog("Requesting videos...");
   const files = await dialog.showOpenDialog({
     title,
     defaultPath,
@@ -63,6 +65,8 @@ const getVideoDetails = async (win, videos = []) => {
 
   // If any videos were processed, send details to renderer
   if (!details.length) return;
+
+  await logger.addLog("Sending details to renderer...");
   win.webContents.send("video-details", details);
 };
 
@@ -84,12 +88,14 @@ const getVideoDetails = async (win, videos = []) => {
  */
 const videoExists = async (tokens, title, win, limit = 50) => {
   try {
+    await logger.addLog("Checking if video exists...");
     // Refresh tokens if it doesn't exist or expired
     if (!tokens.access_token || Date.now() > tokens.expiry_date) {
       tokens = await refreshAccessToken(tokens);
     }
 
     // Set up credentials for YouTube API
+    await logger.addLog("Setting up OAuth2 client and setting credentials...");
     const oauth2Client = new google.auth.OAuth2(
       tokens.client_id,
       tokens.client_secret,
@@ -100,6 +106,7 @@ const videoExists = async (tokens, title, win, limit = 50) => {
     const youtube = google.youtube({ version: "v3", auth: oauth2Client });
 
     // Fetch last few uploads as defined in 'limit' from the channel
+    await logger.addLog(`Fetching last ${limit} uploads`);
     const res = await youtube.search.list({
       part: "snippet",
       forMine: true,
@@ -113,6 +120,7 @@ const videoExists = async (tokens, title, win, limit = 50) => {
     const exists = videos.some((v) => v.snippet.title === title);
 
     if (exists) {
+      await logger.addLog(`Video match found: original "${title}"`);
       const result = await dialog.showMessageBox(win, {
         type: "warning",
         title: "Video Already Exists",
@@ -135,8 +143,7 @@ const videoExists = async (tokens, title, win, limit = 50) => {
       buttons: ["OK"],
     });
 
-    console.log(`Checking if ${title} existed has failed!`);
-    console.log(err);
+    await logger.addError(err, "error", `Checking if "${title}" existed has failed!`);
   }
 };
 
@@ -151,6 +158,7 @@ const confirmCloseApp = async (queueManager, win, event) => {
   // If ongoing uploads, prevent default execution of closing window
   if (queueManager.hasActiveOrPendingUploads()) {
     event.preventDefault();
+    await logger.addLog("Detected window close during active uploads!");
 
     const result = await dialog.showMessageBox(win, {
       type: "warning",
@@ -164,7 +172,7 @@ const confirmCloseApp = async (queueManager, win, event) => {
 
     if (result.response === 0) {
       // Cancel all uploads and close windows
-      queueManager.cancelAll();
+      await queueManager.cancelAll();
       win.destroy();
     }
   }
@@ -208,9 +216,9 @@ const shutDownComputer = async (win, seconds = 60) => {
       buttons: ["OK", "Cancel"],
       defaultId: 1,
     })
-    .then((result) => {
+    .then(async (result) => {
       if (result.response === 0) {
-        // OK clicked
+        await logger.addLog("Attempting to shut down...");
         _shutDownOnDifferentOS();
       } else {
         canceled = true;
@@ -218,9 +226,11 @@ const shutDownComputer = async (win, seconds = 60) => {
     });
 
   // Wait certain delay before shutting down
+  await logger.addLog(`Waiting ${seconds} seconds...`);
   await sleep(seconds * 1000);
 
   if (!canceled) {
+    await logger.addLog("Attempting to shut down...");
     _shutDownOnDifferentOS();
   }
 };

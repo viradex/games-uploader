@@ -21,7 +21,7 @@ const addUploadCard = (upload, container) => {
   // Adds the three main sections of the card: header, progress, and footer
   card.innerHTML = `
     <div class="uploadHeader">
-      <div class="uploadTitle">
+      <div class="uploadTitle" title="UUID: ${upload.uuid}">
         ${upload.title}
         <span class="uploadLength">• ${upload.duration}</span>
       </div>
@@ -99,7 +99,7 @@ const updateCard = async (uuid, status, percentDone, sizeDone, totalSize, speed,
       statusText = "Upload failed";
       break;
     case "cancel":
-      statusText = "Cancelled upload";
+      statusText = "Canceled upload";
       break;
     default:
       statusText = "Unknown status";
