@@ -73,9 +73,11 @@ const createAppMenu = (win, queueManager) => {
               defaultId: 0,
             });
 
-            const configPath = path.join(process.cwd(), "config.json");
-            await logger.addLog(`Opening config.json at: ${configPath}`);
-            shell.openPath(configPath);
+            if (result.response === 0) {
+              const configPath = path.join(process.cwd(), "config.json");
+              await logger.addLog(`Opening config.json at: ${configPath}`);
+              shell.openPath(configPath);
+            }
           },
         },
         { role: "quit" },

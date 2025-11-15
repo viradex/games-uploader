@@ -78,6 +78,17 @@ const combineVideos = async (win) => {
     return;
   }
 
+  const confirm = await dialog.showMessageBox(win, {
+    message: "Are you sure you want to combine these videos?",
+    detail: "Combining the videos will cause the original videos to be deleted!",
+    title: "Confirm Combining Videos",
+    type: "question",
+    buttons: ["OK", "Cancel"],
+    defaultId: 0,
+  });
+
+  if (confirm.response === 1) return;
+
   await logger.addLog(`Selected ${files.length} videos for combination`);
   const sortedFiles = sortVideos(files);
   await logger.addLog(`Sorted videos: ${sortedFiles.join(", ")}`);

@@ -278,6 +278,7 @@ body {
   gap: 15px;
   scrollbar-width: thin;
   scrollbar-color: #252525 #2d2d2d;
+  line-height: 1.25;
 }
 
 #logContainer::-webkit-scrollbar {

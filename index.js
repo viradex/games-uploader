@@ -10,6 +10,7 @@ const {
   confirmCloseApp,
   shutDownComputer,
 } = require("./src/backend/utils.js");
+const checkAndDeleteLogs = require("./src/backend/logging/removeLogs.js");
 const Upload = require("./src/backend/upload.js");
 const QueueManager = require("./src/backend/queue.js");
 const logger = require("./src/backend/logging/loggerSingleton.js");
@@ -97,6 +98,9 @@ app.whenReady().then(async () => {
       app.setAppUserModelId("Games Uploader");
     }
 
+    await logger.addLog("Checking if there are logs to delete...");
+    await checkAndDeleteLogs();
+
     tokens = await getTokens(win);
     clientSecrets = getClientSecrets();
 
@@ -116,7 +120,7 @@ app.whenReady().then(async () => {
       });
     });
   } catch (err) {
-    logger.addError(err, "critical", err.message);
+    await logger.addError(err, "critical", err.message);
     app.quit();
   }
 });
