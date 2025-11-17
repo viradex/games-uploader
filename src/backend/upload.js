@@ -84,10 +84,12 @@ class Upload {
     }
 
     // Sets up credentials for YouTube API
+    const creds = this.clientSecrets.installed || this.clientSecrets.web || this.clientSecrets;
+
     const oauth2Client = new google.auth.OAuth2(
-      this.clientSecrets.client_id,
-      this.clientSecrets.client_secret,
-      this.clientSecrets.redirect_uri
+      creds.client_id,
+      creds.client_secret,
+      creds.redirect_uris?.[0]
     );
     oauth2Client.setCredentials(this.tokens);
 

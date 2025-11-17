@@ -251,7 +251,7 @@ const refreshAccessToken = async (tokens) => {
  * @throws Error if client secrets file could not be accessed
  */
 const getTokens = async (win) => {
-  const { userEnteredSecretsPath, REDIRECT_URI, CLIENT_SECRETS_PATH } = _getConstants();
+  const { userEnteredSecretsPath, REDIRECT_URI, CLIENT_SECRETS_PATH, TOKEN_PATH } = _getConstants();
   // Ensures the client secrets file exists and the user has entered a path in config.json
   if (!fs.existsSync(CLIENT_SECRETS_PATH) || !userEnteredSecretsPath) {
     await dialog.showMessageBox(win, {
@@ -265,7 +265,7 @@ const getTokens = async (win) => {
   }
 
   // Reads previously saved tokens from disk
-  await logger.addLog("Retrieving saved tokens from disk");
+  await logger.addLog(`Retrieving saved tokens from disk at "${TOKEN_PATH}"`);
   let tokens = getSavedTokens();
 
   // If no tokens are found, opens Google OAuth login page for auth code, then exchanges code for tokens and saves that to disk
@@ -289,7 +289,14 @@ const getTokens = async (win) => {
   await logger.addLog("Creating new OAuth2 client");
   const creds = JSON.parse(fs.readFileSync(CLIENT_SECRETS_PATH, "utf8")).installed;
   const oauth2Client = new google.auth.OAuth2(creds.client_id, creds.client_secret, REDIRECT_URI);
-  oauth2Client.setCredentials(tokens);
+
+  oauth2Client.setCredentials({
+    access_token: tokens.access_token,
+    refresh_token: tokens.refresh_token,
+    expiry_date: tokens.expiry_date,
+    token_type: "Bearer",
+    scope: "https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/youtube.upload",
+  });
 
   // Checks if access token is missing or past expiry date
   // If so, refreshes tokens and updates OAuth2 client

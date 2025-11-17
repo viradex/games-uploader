@@ -34,11 +34,11 @@
   },
   "dependencies": {
     "chokidar": "^4.0.3",
-    "electron": "^39.2.0",
     "ffmpeg-static": "^5.2.0",
     "googleapis": "^164.1.0"
   },
   "devDependencies": {
+    "electron": "^39.2.0",
     "electron-builder": "^26.0.12"
   }
 }
