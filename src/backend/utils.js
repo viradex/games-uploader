@@ -74,8 +74,6 @@ const getVideoDetails = async (win, videos = []) => {
     return new Date(dateA.replace(/\//g, "-")) - new Date(dateB.replace(/\//g, "-"));
   });
 
-  console.log(details);
-
   await logger.addLog("Sending details to renderer...");
   win.webContents.send("video-details", details);
 };

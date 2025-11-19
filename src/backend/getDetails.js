@@ -87,8 +87,6 @@ const parseVideoTitle = async (filename) => {
  * @returns {Promise<string | Error>} The formatted duration or an error if the parsing failed
  */
 const getVideoDuration = async (filePath) => {
-  await logger.addLog(`Fetching video duration for: ${filePath}`);
-
   return new Promise((resolve, reject) => {
     // Executes FFmpeg binary with -i flag for information
     execFile(ffmpegPath, ["-i", filePath], async (err, stdout, stderr) => {
@@ -128,8 +126,6 @@ const getSize = async (filePath) => {
 
   const stats = await fs.stat(filePath);
   const size = (stats.size / (1024 * 1024)).toFixed(2);
-
-  await logger.addLog(`File size: ${size} MB`);
   return size;
 };
 
@@ -151,8 +147,6 @@ const getSize = async (filePath) => {
  * @returns The playlist ID the video belongs to based on the config
  */
 const getPlaylist = async (title, config) => {
-  await logger.addLog(`Selecting playlist for title: ${title}`);
-
   const playlists = config.playlists;
 
   // Gets the year and month from the date pattern
@@ -167,7 +161,7 @@ const getPlaylist = async (title, config) => {
     }
   }
 
-  await logger.addLog(`Playlist selected: ${playlistID || "None (default)"}`);
+  await logger.addLog(`Playlist selected: ${playlistID}`);
   return playlistID;
 };
 
@@ -199,8 +193,6 @@ const getDetails = async (videoPath) => {
   const duration = await getVideoDuration(videoPath);
   const totalSize = await getSize(videoPath);
   const playlist = await getPlaylist(title, getConfig());
-
-  await logger.addLog(`Finished gathering video metadata for: ${filename}`);
 
   return {
     videoPath,

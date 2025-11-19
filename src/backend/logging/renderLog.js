@@ -1,6 +1,7 @@
 const logContainer = document.getElementById("logContainer");
 const logFileBtn = document.getElementById("openLogBtn");
 
+// When page loads, scroll to the bottom if possible
 window.addEventListener("DOMContentLoaded", () => {
   logContainer.scrollTo({ top: logContainer.scrollHeight, behavior: "smooth" });
 });

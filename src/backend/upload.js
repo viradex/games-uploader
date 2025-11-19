@@ -158,9 +158,7 @@ class Upload {
    */
   async startUpload(progressCallback) {
     try {
-      await logger.addLog(
-        `The video "${this.title}" (UUID ${this.uuid}) is in authentication phase`
-      );
+      await logger.addLog(`Authenticating "${this.title}" (UUID ${this.uuid})`);
       this.status = "auth";
       this.#emit(progressCallback, { eta: "..." });
 
@@ -168,7 +166,7 @@ class Upload {
       const youtube = await this.#initOAuth();
       await youtube.channels.list({ part: "snippet", mine: true });
 
-      await logger.addLog(`The video "${this.title}" (UUID ${this.uuid}) is in uploading phase`);
+      await logger.addLog(`Uploading video "${this.title}" (UUID ${this.uuid})`);
       this.status = "upload";
       this.#emit(progressCallback, { eta: "..." });
 
@@ -209,7 +207,7 @@ class Upload {
         }
       );
 
-      await logger.addLog(`The video "${this.title}" (UUID ${this.uuid}) is in processing phase`);
+      await logger.addLog(`Processing video "${this.title}" (UUID ${this.uuid})`);
       this.status = "process";
       this.#emit(progressCallback, { sizeDone: this.totalSize, eta: "—" });
 
@@ -232,7 +230,7 @@ class Upload {
       }
 
       // Mark upload as completed
-      await logger.addLog(`The video "${this.title}" (UUID ${this.uuid}) has completed the upload`);
+      await logger.addLog(`Completed uploading video "${this.title}" (UUID ${this.uuid})`);
       this.status = "complete";
       this.percentDone = 100;
       this.sizeDone = this.totalSize * 1024 * 1024;
@@ -254,7 +252,7 @@ class Upload {
       if (err.message.toLowerCase() === "the operation was aborted.") {
         // Not really a good check, but err.code doesn't work
         // If the operation was canceled by user
-        await logger.addLog(`The video "${this.title}" (UUID ${this.uuid}) has been canceled`);
+        await logger.addLog(`Canceled upload of the video "${this.title}" (UUID ${this.uuid})`);
         this.status = "cancel";
         this.#emit(progressCallback);
       } else {
@@ -276,7 +274,7 @@ class Upload {
         await logger.addError(
           err,
           "error",
-          `Uploading the video ${this.title} with UUID of ${this.uuid} has failed!`
+          `Failed to upload video ${this.title} with UUID of ${this.uuid}!`
         );
       }
 

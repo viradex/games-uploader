@@ -138,7 +138,7 @@ const combineVideos = async (win) => {
   });
 
   if (uploadConfirm.response === 0) {
-    await logger.addLog(`Uploading video...`);
+    await logger.addLog("Uploading video...");
     await getVideoDetails(win, [sortedFiles[0]]);
   }
 };
