@@ -2,7 +2,7 @@ const logContainer = document.getElementById("logContainer");
 const logFileBtn = document.getElementById("openLogBtn");
 
 window.addEventListener("DOMContentLoaded", () => {
-  logContainer.scrollTop = logContainer.scrollHeight;
+  logContainer.scrollTo({ top: logContainer.scrollHeight, behavior: "smooth" });
 });
 
 logFileBtn.addEventListener("click", () => {

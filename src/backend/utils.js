@@ -66,6 +66,16 @@ const getVideoDetails = async (win, videos = []) => {
   // If any videos were processed, send details to renderer
   if (!details.length) return;
 
+  details.sort((a, b) => {
+    // Extract date+time from title
+    const dateA = a.title.match(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}$/)[0];
+    const dateB = b.title.match(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}$/)[0];
+
+    return new Date(dateA.replace(/\//g, "-")) - new Date(dateB.replace(/\//g, "-"));
+  });
+
+  console.log(details);
+
   await logger.addLog("Sending details to renderer...");
   win.webContents.send("video-details", details);
 };

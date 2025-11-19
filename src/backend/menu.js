@@ -54,7 +54,7 @@ const createAppMenu = (win, queueManager) => {
           label: "View Logs",
           click: async () => {
             await logger.addLog("User opened log window");
-            createLogWindow(win);
+            createLogWindow();
           },
         },
         { type: "separator" },

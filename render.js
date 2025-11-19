@@ -26,13 +26,10 @@ window.electronAPI.onUpdateCheckboxes((states) => {
 });
 
 // When all details of the video have been received, make a new upload card
-window.electronAPI.onVideoDetails(async (details) => {
+window.electronAPI.onVideoDetails((details) => {
   for (const video of details) {
     addUploadCard(video, uploadContainer);
-  }
-
-  for (const video of details) {
-    await window.electronAPI.startUpload(video);
+    window.electronAPI.startUpload(video);
   }
 });
 

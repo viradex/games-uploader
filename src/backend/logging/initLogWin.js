@@ -8,25 +8,23 @@ let logWin = null;
 
 /**
  * Creates (or focuses) the log viewer window.
- *
- * @param {BrowserWindow} parent Optional parent window
  */
-const createLogWindow = (parent) => {
+const createLogWindow = () => {
   if (logWin && !logWin.isDestroyed()) {
     logWin.focus();
     return logWin;
   }
 
+  // TODO attempt to group this with main window in taskbar
   logWin = new BrowserWindow({
     width: 800,
     height: 570,
     title: "Games Uploader Logs",
     backgroundColor: "#1e1e1e",
     resizable: false,
-    parent: parent ?? null,
     modal: false,
+    skipTaskbar: false,
     autoHideMenuBar: true,
-    menuBarVisible: false,
     webPreferences: {
       preload: path.join(__dirname, "preloadLog.js"),
       nodeIntegration: false,
@@ -52,7 +50,7 @@ const createLogWindow = (parent) => {
 
 ipcMain.on("open-log", async (event) => {
   await logger.addLog("Received 'open log' request");
-  shell.openPath(logger.logPath);
+  shell.showItemInFolder(logger.logPath);
 });
 
 module.exports = { createLogWindow };
