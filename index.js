@@ -1,9 +1,14 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
+const fs = require("fs").promises;
 
 const { getConfig, setConfig } = require("./src/backend/config.js");
 const { createAppMenu, updateCancelMenuItems } = require("./src/backend/menu.js");
-const { getTokens, getClientSecrets } = require("./src/backend/auth/googleAuth.js");
+const {
+  getTokens,
+  getClientSecrets,
+  remedyTokenRefreshError,
+} = require("./src/backend/auth/googleAuth.js");
 const {
   getVideoDetails,
   videoExists,
@@ -101,9 +106,14 @@ app.whenReady().then(async () => {
     await logger.addLog("Checking if there are logs to delete...");
     await checkAndDeleteLogs();
 
-    tokens = await getTokens(win);
-    clientSecrets = getClientSecrets();
+    try {
+      tokens = await getTokens(win);
+    } catch (err) {
+      await logger.addError(err, "error", err.message);
+      await remedyTokenRefreshError(win);
+    }
 
+    clientSecrets = getClientSecrets();
     await logger.addLog("Obtained tokens and client secrets");
 
     // For debugging https://github.com/viradex/games-uploader/issues/4

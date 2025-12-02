@@ -318,6 +318,34 @@ const getTokens = async (win) => {
   return tokens;
 };
 
+/**
+ * Fixes token refresh error that can sometimes happen, causing the app
+ * to crash on startup. This can be fixed by deleting the `token.json` file,
+ * which this function does.
+ *
+ * @param {any} win The main BrowserWindow
+ */
+const remedyTokenRefreshError = async (win) => {
+  const { TOKEN_PATH } = _getConstants();
+
+  const response = dialog.showMessageBoxSync(win, {
+    title: "Error Getting Tokens",
+    message:
+      "An error occurred while getting the tokens. This can be caused due to the tokens expiring, and the program was unable to automatically refresh it.\n\nThis issue can likely be fixed by deleting the tokens and remaking it by restarting the app. Would you like to do so?",
+    type: "error",
+    buttons: ["OK", "Cancel"],
+  });
+
+  if (response === 0) {
+    await fs.promises.rm(TOKEN_PATH);
+
+    app.relaunch();
+    app.exit(0);
+  } else {
+    app.exit(1);
+  }
+};
+
 module.exports = {
   startOAuthFlow,
   getSavedTokens,
@@ -327,4 +355,5 @@ module.exports = {
   exchangeCodeForTokens,
   refreshAccessToken,
   getTokens,
+  remedyTokenRefreshError,
 };
