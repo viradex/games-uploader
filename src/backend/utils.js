@@ -107,7 +107,7 @@ const videoExists = async (tokens, title, win, limit = 50) => {
     const oauth2Client = new google.auth.OAuth2(
       tokens.client_id,
       tokens.client_secret,
-      tokens.redirect_uri
+      tokens.redirect_uri,
     );
     oauth2Client.setCredentials(tokens);
 
@@ -142,7 +142,7 @@ const videoExists = async (tokens, title, win, limit = 50) => {
     } else return false;
   } catch (err) {
     // Catch API errors
-    dialog.showMessageBox(this.win, {
+    dialog.showMessageBox(win, {
       type: "error",
       title: "Failed to Check if Video Exists",
       message: `An error occurred while checking if the provided video already existed.\n\nError message: ${
@@ -188,14 +188,17 @@ const confirmCloseApp = async (queueManager, win, event) => {
 
 /**
  * Runs the appropriate shut down command depending on the OS.
+ * Also prints the ending footer for the log file, even if unsuccessful.
  */
-const _shutDownOnDifferentOS = () => {
+const _shutDownOnDifferentOS = async () => {
   const _handleErr = (err) => {
     if (err) {
       console.log("Error shutting down!");
       console.log(err);
     }
   };
+
+  await logger.endLogFile();
 
   if (process.platform === "win32") exec("shutdown /s /t 0", _handleErr);
   else if (process.platform === "darwin") exec("sudo shutdown -h now", _handleErr);
@@ -227,7 +230,7 @@ const shutDownComputer = async (win, seconds = 60) => {
     .then(async (result) => {
       if (result.response === 0) {
         await logger.addLog("Attempting to shut down...");
-        _shutDownOnDifferentOS();
+        await _shutDownOnDifferentOS();
       } else {
         canceled = true;
       }
@@ -239,7 +242,7 @@ const shutDownComputer = async (win, seconds = 60) => {
 
   if (!canceled) {
     await logger.addLog("Attempting to shut down...");
-    _shutDownOnDifferentOS();
+    await _shutDownOnDifferentOS();
   }
 };
 

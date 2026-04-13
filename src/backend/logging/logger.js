@@ -65,7 +65,7 @@ class Logger {
       return ["", "--- END LOGGING ---", "", `Finished: ${formattedDate}`, ""].join("\n");
     } else {
       throw new TypeError(
-        `Parameter 'location' did not match expected values "header" or "footer", received "${location}"`
+        `Parameter 'location' did not match expected values "header" or "footer", received "${location}"`,
       );
     }
   }

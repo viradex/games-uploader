@@ -119,7 +119,7 @@ app.whenReady().then(async () => {
     // For debugging https://github.com/viradex/games-uploader/issues/4
     await logger.addLog(
       `Config checkboxes states: 'Don't show completion notifications' is ${config.dontShowCompletionNotification} and 'Shut down on completion' is ${config.shutDownOnComplete}`,
-      "debug"
+      "debug",
     );
 
     // Once the webpage has loaded, update checkboxes to whatever the config is
@@ -168,7 +168,7 @@ ipcMain.on("start-upload", async (event, details) => {
     details.playlist,
     tokens,
     clientSecrets,
-    win
+    win,
   );
 
   // Adds a new value to the Map and queue manager
@@ -176,7 +176,7 @@ ipcMain.on("start-upload", async (event, details) => {
   await queueManager.add(uploadInstance);
 
   await logger.addLog(
-    `Successfully added video to queue with title "${details.title}" and UUID ${details.uuid}`
+    `Successfully added video to queue with title "${details.title}" and UUID ${details.uuid}`,
   );
 });
 
@@ -200,10 +200,9 @@ ipcMain.handle("show-dialog", async (event, options) => {
 
 app.on("before-quit", async () => {
   await logger.addLog("Stopping application...");
-});
-
-app.on("will-quit", async () => {
   await logger.endLogFile();
+
+  app.exit(0);
 });
 
 app.on("window-all-closed", () => {

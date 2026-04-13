@@ -134,7 +134,7 @@ const combineVideos = async (win) => {
     title: "Successfully Combined Videos",
     type: "info",
     buttons: ["OK", "Cancel"],
-    defaultId: 1,
+    defaultId: 0,
   });
 
   if (uploadConfirm.response === 0) {
