@@ -39,7 +39,7 @@ const parseVideoTitle = async (filename) => {
 
       const formattedDate = `${dateStr.slice(0, 4)}/${dateStr.slice(4, 6)}/${dateStr.slice(
         6,
-        8
+        8,
       )} ${dateStr.slice(8, 10)}:${dateStr.slice(10, 12)}:${dateStr.slice(12, 14)}`;
 
       const result = `${game} ${formattedDate}`;
@@ -70,6 +70,23 @@ const parseVideoTitle = async (filename) => {
     const result = `${gameName} ${formatted}`;
 
     await logger.addLog(`Parsed mobile recorder title: ${result}`);
+    return result;
+  }
+
+  // Case 4: Android screen recording
+  const screenRecordingMatch = filename.match(/^Screen_Recording_(\d{8})_(\d{6})_(.+)$/);
+  if (screenRecordingMatch) {
+    const dateStr = screenRecordingMatch[1];
+    const timeStr = screenRecordingMatch[2];
+    const appName = screenRecordingMatch[3];
+
+    const formattedDate = `${dateStr.slice(0, 4)}/${dateStr.slice(4, 6)}/${dateStr.slice(
+      6,
+      8,
+    )} ${timeStr.slice(0, 2)}:${timeStr.slice(2, 4)}:${timeStr.slice(4, 6)}`;
+    const result = `${appName} ${formattedDate}`;
+
+    await logger.addLog(`Parsed Android screen recording title: ${result}`);
     return result;
   }
 
