@@ -3,8 +3,22 @@ import sys
 from pathlib import Path
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QIcon
-from PySide6.QtWidgets import QApplication, QLabel, QMainWindow
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import (
+    QApplication,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QStackedWidget,
+    QStatusBar,
+    QVBoxLayout,
+    QWidget,
+)
+
+from ui.components.menu_bar import ApplicationMenuBar
+from ui.components.nav_sidebar import NavigationSidebar
+from ui.screens.settings import SettingsScreen
+from ui.screens.videos import VideosScreen
 
 WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 600
@@ -19,8 +33,8 @@ class MainWindow(QMainWindow):
 
         self.center_window()
         self._setup_icon()
+        self._setup_ui()
         self._setup_menu_bar()
-        self._setup_status_bar()
 
     def center_window(self) -> None:
         screen = QApplication.primaryScreen().availableGeometry()
@@ -42,86 +56,73 @@ class MainWindow(QMainWindow):
                 "com.viradex.gamesuploader"
             )
 
-    def _setup_menu_bar(self) -> None:
-        menu_bar = self.menuBar()
+    def _setup_ui(self) -> None:
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
 
-        # File
-        file_menu = menu_bar.addMenu("File")
+        main_layout = QHBoxLayout(central_widget)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
 
-        logs_action = QAction("View Logs", self)
-        settings_action = QAction("Settings", self)
-        exit_action = QAction("Exit", self)
+        # Sidebar
+        self.sidebar = NavigationSidebar()
 
-        exit_action.triggered.connect(QApplication.exit)
+        base_dir = Path(__file__).resolve().parent.parent
+        icon_path = base_dir / "ui" / "assets" / "icons"
 
-        file_menu.addAction(logs_action)
-        file_menu.addAction(settings_action)
-        file_menu.addSeparator()
-        file_menu.addAction(exit_action)
-
-        # Videos
-        videos_menu = menu_bar.addMenu("Videos")
-
-        upload_action = QAction("Upload Videos", self)
-        combine_action = QAction("Combine Videos", self)
-        cancel_current_action = QAction("Cancel Current Upload", self, enabled=False)
-        cancel_pending_action = QAction("Cancel Pending Uploads", self, enabled=False)
-        cancel_all_action = QAction("Cancel All Uploads", self, enabled=False)
-
-        videos_menu.addAction(upload_action)
-        videos_menu.addAction(combine_action)
-        videos_menu.addSeparator()
-        videos_menu.addAction(cancel_current_action)
-        videos_menu.addAction(cancel_pending_action)
-        videos_menu.addAction(cancel_all_action)
-
-        # Window
-        window_menu = menu_bar.addMenu("Window")
-
-        minimize_action = QAction("Minimize", self)
-        maximize_action = QAction("Maximize", self)
-        restore_action = QAction("Restore", self)
-        always_on_top_action = QAction(
-            "Always on Top", self, checkable=True, checked=False
+        self.games_button = self.sidebar.add_button(
+            QIcon(str(icon_path / "icon.ico")), "Videos", checked=True
+        )
+        self.upload_button = self.sidebar.add_button(
+            QIcon(str(icon_path / "settings.png")), "Settings"
         )
 
-        minimize_action.triggered.connect(self.showMinimized)
-        maximize_action.triggered.connect(self.showMaximized)
-        restore_action.triggered.connect(self.showNormal)
-        always_on_top_action.triggered.connect(self._always_on_top)
+        self.sidebar.add_stretch()
 
-        window_menu.addAction(minimize_action)
-        window_menu.addAction(maximize_action)
-        window_menu.addAction(restore_action)
-        window_menu.addSeparator()
-        window_menu.addAction(always_on_top_action)
+        self.logs_button = self.sidebar.add_button(
+            QIcon(str(icon_path / "terminal.png")), "Logs", checkable=False
+        )
 
-        # Help
-        help_menu = menu_bar.addMenu("Help")
+        # Main content area
+        content_widget = QWidget()
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setSpacing(0)
 
-        documentation_action = QAction("Documentation", self)
-        report_issue_action = QAction("Report an Issue", self)
-        about_qt_action = QAction("About Qt", self)
-        about_action = QAction("About Games Uploader", self)
+        self.stack = QStackedWidget()
 
-        about_qt_action.triggered.connect(QApplication.aboutQt)
+        self.videos_screen = VideosScreen()
+        self.settings_screen = SettingsScreen()
 
-        help_menu.addAction(documentation_action)
-        help_menu.addAction(report_issue_action)
-        help_menu.addSeparator()
-        help_menu.addAction(about_qt_action)
-        help_menu.addAction(about_action)
+        self.stack.addWidget(self.videos_screen)
+        self.stack.addWidget(self.settings_screen)
 
-    def _always_on_top(self, checked: bool) -> None:
-        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, checked)
+        content_layout.addWidget(self.stack)
+
+        # Status bar inside content area
+        self.status_bar = QStatusBar()
+        self.status_bar.setSizeGripEnabled(False)
+
+        self.status_label = QLabel("Ready")
+        self.status_label.setStyleSheet("padding-left: 8px;" "padding-bottom: 8px;")
+
+        self.status_bar.addWidget(self.status_label, stretch=1)
+
+        content_layout.addWidget(self.status_bar)
+
+        # Put sidebar and content next to each other
+        main_layout.addWidget(self.sidebar)
+        main_layout.addWidget(content_widget)
+
+        self.stack.setCurrentIndex(0)
+
+    def _setup_menu_bar(self) -> None:
+        self.menu_bar = ApplicationMenuBar()
+        self.menu_bar.always_on_top_clicked.connect(self._always_on_top)
+
+        self.setMenuBar(self.menu_bar)
+
+    def _always_on_top(self, enable: bool) -> None:
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, enable)
         self.hide()
         self.show()
-
-    def _setup_status_bar(self) -> None:
-        # FIXME status bar disappears when hovering over menu bar
-        status_bar = self.statusBar()
-        status_bar.setSizeGripEnabled(False)
-
-        status_label = QLabel("Ready")
-        status_label.setStyleSheet("padding-left: 4px;" "padding-bottom: 4px;")
-        status_bar.addWidget(status_label, stretch=1)
