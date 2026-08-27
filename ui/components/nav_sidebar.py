@@ -12,7 +12,7 @@ class NavigationSidebar(QFrame):
 
     def _setup_ui(self) -> None:
         self.vbox = QVBoxLayout(self)
-        self.vbox.setContentsMargins(6, 10, 6, 10)
+        self.vbox.setContentsMargins(6, 6, 6, 6)
         self.vbox.setSpacing(6)
 
         self.button_group = QButtonGroup(self)
@@ -40,7 +40,7 @@ class NavigationSidebar(QFrame):
 
     def add_button(
         self, icon: str, tooltip: str, checked: bool = False, checkable: bool = True
-    ) -> None:
+    ) -> QToolButton:
         button = QToolButton()
         button.setIcon(icon)
         button.setIconSize(QSize(24, 24))

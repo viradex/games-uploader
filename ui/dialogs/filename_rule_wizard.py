@@ -117,7 +117,7 @@ class FilenameFormatPage(QWizardPage):
         self.filename_format.setText(original_text + token_text)
 
 
-class CreateFilenameRuleWizard(QWizard):
+class FilenameRuleWizardDialog(QWizard):
     def __init__(self) -> None:
         super().__init__()
 
