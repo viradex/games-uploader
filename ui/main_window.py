@@ -1,5 +1,4 @@
 import ctypes
-import logging
 import sys
 from pathlib import Path
 
@@ -16,12 +15,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from core.app.dialog_factory import create_dialog_bundle
+from core.app.dialog_factory import create_dialog_widget
 from core.app.dialog_ids import Dialog
-from core.app.screen_factory import create_screen_bundle
+from core.app.screen_factory import create_screen_widget
 from core.app.screen_ids import Screen
-from logic.handlers.log_handler import UILogHandler
-from ui.components.log_viewer import LogViewer
 from ui.components.menu_bar import ApplicationMenuBar
 from ui.components.nav_sidebar import NavigationSidebar
 
@@ -33,10 +30,7 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
 
-        self._setup_ui_logging()
-
         self.dialog_widgets = {}
-        self.dialog_logic = {}
 
         self.setMinimumSize(WINDOW_WIDTH, WINDOW_HEIGHT)
         self.setWindowTitle("Games Uploader")
@@ -66,22 +60,6 @@ class MainWindow(QMainWindow):
                 "com.viradex.gamesuploader"
             )
 
-    def _setup_ui_logging(self) -> None:
-        self.log_viewer = LogViewer()
-
-        self.ui_log_handler = UILogHandler()
-        self.ui_log_handler.setLevel(logging.DEBUG)
-
-        self.ui_log_handler.setFormatter(
-            logging.Formatter(
-                "(%(asctime)s) [%(levelname)s] %(name)s | %(message)s",
-                datefmt="%H:%M:%S",
-            )
-        )
-
-        self.ui_log_handler.logged.connect(self.log_viewer.add_log)
-        logging.getLogger().addHandler(self.ui_log_handler)
-
     def _setup_ui(self) -> None:
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -93,12 +71,8 @@ class MainWindow(QMainWindow):
         # Sidebar
         self.sidebar = NavigationSidebar()
 
-        self.videos_screen, self.videos_logic = create_screen_bundle(
-            Screen.VIDEOS, self
-        )
-        self.settings_screen, self.settings_logic = create_screen_bundle(
-            Screen.SETTINGS, self
-        )
+        self.videos_screen = create_screen_widget(Screen.VIDEOS, self)
+        self.settings_screen = create_screen_widget(Screen.SETTINGS, self)
 
         self.stack = QStackedWidget()
         self.stack.addWidget(self.videos_screen)
@@ -159,13 +133,9 @@ class MainWindow(QMainWindow):
 
     def open_dialog(self, dialog: Dialog, is_modal: bool = True):
         if dialog not in self.dialog_widgets:
-            if dialog is Dialog.LOGS:
-                widget, logic = create_dialog_bundle(dialog, self, (self.log_viewer,))
-            else:
-                widget, logic = create_dialog_bundle(dialog, self)
+            widget = create_dialog_widget(dialog, self)
 
             self.dialog_widgets[dialog] = widget
-            self.dialog_logic[dialog] = logic
 
         if is_modal:
             self.dialog_widgets[dialog].exec()

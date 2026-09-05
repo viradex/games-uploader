@@ -1,33 +1,22 @@
 from PySide6.QtWidgets import QWidget
 
 from core.app.dialog_ids import Dialog
-from logic.dialogs.filename_rule_wizard import FilenameRuleWizardLogic
-from logic.dialogs.logs import LogsDialogLogic
-from logic.dialogs.no_matching_rule import NoMatchingRuleLogic
 from ui.dialogs.filename_rule_wizard import FilenameRuleWizardDialog
 from ui.dialogs.logs import LogsDialog
 from ui.dialogs.no_matching_rule import NoMatchingRuleDialog
 
 DIALOG_DATA = {
-    Dialog.LOGS: (LogsDialog, LogsDialogLogic),
-    Dialog.FILENAME_RULE_WIZARD: (FilenameRuleWizardDialog, FilenameRuleWizardLogic),
-    Dialog.NO_MATCHING_RULE: (NoMatchingRuleDialog, NoMatchingRuleLogic),
+    Dialog.LOGS: LogsDialog,
+    Dialog.FILENAME_RULE_WIZARD: FilenameRuleWizardDialog,
+    Dialog.NO_MATCHING_RULE: NoMatchingRuleDialog,
 }
 
 
-def create_dialog_bundle(
-    dialog: Dialog, parent: QWidget | None = None, screen_args: tuple | None = None
-) -> tuple:
+def create_dialog_widget(dialog: Dialog, parent: QWidget | None = None) -> tuple:
     try:
-        dialog_cls, logic_cls = DIALOG_DATA[dialog]
+        dialog_cls = DIALOG_DATA[dialog]
 
-        if screen_args is not None:
-            widget = dialog_cls(*screen_args, parent)
-        else:
-            widget = dialog_cls(parent)
-
-        logic = logic_cls(widget)
-
-        return widget, logic
+        widget = dialog_cls(parent)
+        return widget
     except KeyError as e:
         raise ValueError(f"Unknown dialog: {dialog}") from e

@@ -1,14 +1,10 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QWidget
-
-from ui.components.log_viewer import LogViewer
+from PySide6.QtWidgets import QDialog, QLabel, QVBoxLayout, QWidget
 
 
 class LogsDialog(QDialog):
-    def __init__(self, log_viewer: LogViewer, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
-
-        self.log_viewer = log_viewer
 
         self.setup_dialog()
 
@@ -21,7 +17,11 @@ class LogsDialog(QDialog):
             | Qt.WindowType.WindowCloseButtonHint
         )
 
+        temp = QLabel("Coming soon!")
+        temp.setStyleSheet("font-size: 24px;" "font-weight: 600;")
+        temp.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
         layout = QVBoxLayout()
-        layout.addWidget(self.log_viewer, stretch=1)
+        layout.addWidget(temp, stretch=1)
 
         self.setLayout(layout)
