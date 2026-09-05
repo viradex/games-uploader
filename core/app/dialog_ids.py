@@ -2,5 +2,6 @@ from enum import Enum
 
 
 class Dialog(Enum):
-    FILENAME_RULE_WIZARD = "filename_rule_wizard"
     LOGS = "logs"
+    FILENAME_RULE_WIZARD = "filename_rule_wizard"
+    NO_MATCHING_RULE = "no_matching_rule"

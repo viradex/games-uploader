@@ -49,10 +49,7 @@ class LogViewer(QPlainTextEdit):
 
         cursor = self.textCursor()
         cursor.movePosition(QTextCursor.MoveOperation.End)
-        cursor.insertText(
-            message + "\n",
-            text_format,
-        )
+        cursor.insertText(message + "\n", text_format)
 
         self.setTextCursor(cursor)
         self.ensureCursorVisible()

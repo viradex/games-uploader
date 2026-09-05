@@ -28,8 +28,6 @@ from ui.components.nav_sidebar import NavigationSidebar
 WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 600
 
-logger = logging.getLogger(__name__)
-
 
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
@@ -176,7 +174,11 @@ class MainWindow(QMainWindow):
 
     def _setup_menu_bar(self) -> None:
         self.menu_bar = ApplicationMenuBar()
+
         self.menu_bar.always_on_top_clicked.connect(self._always_on_top)
+        self.menu_bar.no_matching_rule_clicked.connect(
+            lambda: self.open_dialog(Dialog.NO_MATCHING_RULE)
+        )
 
         self.setMenuBar(self.menu_bar)
 

@@ -3,12 +3,15 @@ from PySide6.QtWidgets import QWidget
 from core.app.dialog_ids import Dialog
 from logic.dialogs.filename_rule_wizard import FilenameRuleWizardLogic
 from logic.dialogs.logs import LogsDialogLogic
+from logic.dialogs.no_matching_rule import NoMatchingRuleLogic
 from ui.dialogs.filename_rule_wizard import FilenameRuleWizardDialog
 from ui.dialogs.logs import LogsDialog
+from ui.dialogs.no_matching_rule import NoMatchingRuleDialog
 
 DIALOG_DATA = {
-    Dialog.FILENAME_RULE_WIZARD: (FilenameRuleWizardDialog, FilenameRuleWizardLogic),
     Dialog.LOGS: (LogsDialog, LogsDialogLogic),
+    Dialog.FILENAME_RULE_WIZARD: (FilenameRuleWizardDialog, FilenameRuleWizardLogic),
+    Dialog.NO_MATCHING_RULE: (NoMatchingRuleDialog, NoMatchingRuleLogic),
 }
 
 

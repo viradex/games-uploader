@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QApplication, QMenuBar, QWidget
 
 class ApplicationMenuBar(QMenuBar):
     always_on_top_clicked = Signal(bool)
+    no_matching_rule_clicked = Signal()
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
@@ -51,6 +52,17 @@ class ApplicationMenuBar(QMenuBar):
         videos_menu.addAction(self.cancel_current_action)
         videos_menu.addAction(self.cancel_pending_action)
         videos_menu.addAction(self.cancel_all_action)
+
+        # Development
+        development_menu = self.addMenu("Development")
+
+        self.no_matching_rule_action = QAction("Open 'No Matching Rule' Dialog", self)
+
+        self.no_matching_rule_action.triggered.connect(
+            lambda: self.no_matching_rule_clicked.emit()
+        )
+
+        development_menu.addAction(self.no_matching_rule_action)
 
         # Window
         window_menu = self.addMenu("Window")
