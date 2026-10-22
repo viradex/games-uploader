@@ -118,8 +118,8 @@ class FilenameFormatPage(QWizardPage):
 
 
 class FilenameRuleWizardDialog(QWizard):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, parent) -> None:
+        super().__init__(parent)
 
         self.setWindowTitle("Create New Filename Rule Wizard")
         self.setWizardStyle(QWizard.WizardStyle.ModernStyle)

@@ -2,10 +2,12 @@ from PySide6.QtCore import QUrl, Signal
 from PySide6.QtGui import QAction, QDesktopServices
 from PySide6.QtWidgets import QApplication, QMenuBar, QWidget
 
+from core.app.dialog_ids import Dialog
+
 
 class ApplicationMenuBar(QMenuBar):
     always_on_top_clicked = Signal(bool)
-    no_matching_rule_clicked = Signal()
+    dialog_clicked = Signal(Dialog)
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
@@ -53,16 +55,18 @@ class ApplicationMenuBar(QMenuBar):
         videos_menu.addAction(self.cancel_pending_action)
         videos_menu.addAction(self.cancel_all_action)
 
-        # Development
-        development_menu = self.addMenu("Development")
+        # Dialogs
+        # TODO remove when dialogs have logic
+        dialogs_menu = self.addMenu("Dialogs")
 
-        self.no_matching_rule_action = QAction("Open 'No Matching Rule' Dialog", self)
+        self.dialog_actions = {}
 
-        self.no_matching_rule_action.triggered.connect(
-            lambda: self.no_matching_rule_clicked.emit()
-        )
-
-        development_menu.addAction(self.no_matching_rule_action)
+        for dialog in Dialog:
+            self.dialog_actions[dialog] = QAction(dialog.name, self)
+            self.dialog_actions[dialog].triggered.connect(
+                lambda checked=False, dialog=dialog: self.dialog_clicked.emit(dialog)
+            )
+            dialogs_menu.addAction(self.dialog_actions[dialog])
 
         # Window
         window_menu = self.addMenu("Window")

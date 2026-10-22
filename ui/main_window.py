@@ -17,10 +17,11 @@ from PySide6.QtWidgets import (
 
 from core.app.dialog_factory import create_dialog_widget
 from core.app.dialog_ids import Dialog
-from core.app.screen_factory import create_screen_widget
 from core.app.screen_ids import Screen
 from ui.components.menu_bar import ApplicationMenuBar
 from ui.components.nav_sidebar import NavigationSidebar
+from ui.screens.settings import SettingsScreen
+from ui.screens.videos import VideosScreen
 
 WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 600
@@ -71,8 +72,8 @@ class MainWindow(QMainWindow):
         # Sidebar
         self.sidebar = NavigationSidebar()
 
-        self.videos_screen = create_screen_widget(Screen.VIDEOS, self)
-        self.settings_screen = create_screen_widget(Screen.SETTINGS, self)
+        self.videos_screen = VideosScreen(self)
+        self.settings_screen = SettingsScreen(self)
 
         self.stack = QStackedWidget()
         self.stack.addWidget(self.videos_screen)
@@ -146,9 +147,7 @@ class MainWindow(QMainWindow):
         self.menu_bar = ApplicationMenuBar()
 
         self.menu_bar.always_on_top_clicked.connect(self._always_on_top)
-        self.menu_bar.no_matching_rule_clicked.connect(
-            lambda: self.open_dialog(Dialog.NO_MATCHING_RULE)
-        )
+        self.menu_bar.dialog_clicked.connect(lambda dialog: self.open_dialog(dialog))
 
         self.setMenuBar(self.menu_bar)
 

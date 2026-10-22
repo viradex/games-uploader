@@ -4,11 +4,13 @@ from core.app.dialog_ids import Dialog
 from ui.dialogs.filename_rule_wizard import FilenameRuleWizardDialog
 from ui.dialogs.logs import LogsDialog
 from ui.dialogs.no_matching_rule import NoMatchingRuleDialog
+from ui.dialogs.unidentified_game import UnidentifiedGameDialog
 
 DIALOG_DATA = {
     Dialog.LOGS: LogsDialog,
     Dialog.FILENAME_RULE_WIZARD: FilenameRuleWizardDialog,
     Dialog.NO_MATCHING_RULE: NoMatchingRuleDialog,
+    Dialog.UNIDENTIFIED_GAME: UnidentifiedGameDialog,
 }
 
 

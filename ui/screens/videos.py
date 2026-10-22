@@ -19,7 +19,7 @@ class VideosScreen(QWidget):
     def setup_ui(self) -> None:
         self.upload_videos_btn = QPushButton("Upload Videos...")
         self.upload_videos_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.upload_videos_btn.setStyleSheet("font-size: 14px;")
+        self.upload_videos_btn.setStyleSheet("font-size: 13px;")
         self.upload_videos_btn.setFixedHeight(35)
         self.upload_videos_btn.clicked.connect(self._on_upload_videos)
 
