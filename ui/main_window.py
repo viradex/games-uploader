@@ -146,7 +146,11 @@ class MainWindow(QMainWindow):
     def _setup_menu_bar(self) -> None:
         self.menu_bar = ApplicationMenuBar()
 
+        self.menu_bar.maximize_clicked.connect(self.showMaximized)
+        self.menu_bar.minimize_clicked.connect(self.showMinimized)
+        self.menu_bar.restore_clicked.connect(self.showNormal)
         self.menu_bar.always_on_top_clicked.connect(self._always_on_top)
+
         self.menu_bar.dialog_clicked.connect(lambda dialog: self.open_dialog(dialog))
 
         self.setMenuBar(self.menu_bar)

@@ -6,7 +6,11 @@ from core.app.dialog_ids import Dialog
 
 
 class ApplicationMenuBar(QMenuBar):
+    maximize_clicked = Signal()
+    minimize_clicked = Signal()
+    restore_clicked = Signal()
     always_on_top_clicked = Signal(bool)
+
     dialog_clicked = Signal(Dialog)
 
     def __init__(self, parent: QWidget | None = None):
@@ -78,9 +82,9 @@ class ApplicationMenuBar(QMenuBar):
             "Always on Top", self, checkable=True, checked=False
         )
 
-        self.maximize_action.triggered.connect(self.showMaximized)
-        self.minimize_action.triggered.connect(self.showMinimized)
-        self.restore_action.triggered.connect(self.showNormal)
+        self.maximize_action.triggered.connect(self.maximize_clicked.emit)
+        self.minimize_action.triggered.connect(self.minimize_clicked.emit)
+        self.restore_action.triggered.connect(self.restore_clicked.emit)
         self.always_on_top_action.triggered.connect(
             lambda: self.always_on_top_clicked.emit(
                 self.always_on_top_action.isChecked()
