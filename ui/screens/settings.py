@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QTabWidget, QVBoxLayout, QWidget
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QScrollArea, QTabWidget, QVBoxLayout, QWidget
 
 from ui.screens.settings_tabs.account import AccountTab
 from ui.screens.settings_tabs.diagnostics import DiagnosticsTab
@@ -59,9 +60,17 @@ class SettingsScreen(QWidget):
         self.setLayout(layout)
 
     def setup_tabs(self) -> None:
-        self.tabs.addTab(GeneralTab(), "General")
-        self.tabs.addTab(UploadsTab(), "Uploads")
-        self.tabs.addTab(VideosTab(), "Videos")
-        self.tabs.addTab(GamesTab(), "Games")
-        self.tabs.addTab(AccountTab(), "Account")
-        self.tabs.addTab(DiagnosticsTab(), "Diagnostics")
+        self.tabs.addTab(self.make_scrollable(GeneralTab()), "General")
+        self.tabs.addTab(self.make_scrollable(UploadsTab()), "Uploads")
+        self.tabs.addTab(self.make_scrollable(VideosTab()), "Videos")
+        self.tabs.addTab(self.make_scrollable(GamesTab()), "Games")
+        self.tabs.addTab(self.make_scrollable(AccountTab()), "Account")
+        self.tabs.addTab(self.make_scrollable(DiagnosticsTab()), "Diagnostics")
+
+    def make_scrollable(self, tab: QWidget) -> QScrollArea:
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QScrollArea.Shape.NoFrame)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.setWidget(tab)
+        return scroll_area

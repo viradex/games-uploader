@@ -78,6 +78,7 @@ class ApplicationMenuBar(QMenuBar):
         self.maximize_action = QAction("Maximize", self)
         self.minimize_action = QAction("Minimize", self)
         self.restore_action = QAction("Restore", self)
+        self.center_action = QAction("Center Window", self)
         self.always_on_top_action = QAction(
             "Always on Top", self, checkable=True, checked=False
         )
@@ -95,6 +96,7 @@ class ApplicationMenuBar(QMenuBar):
         window_menu.addAction(self.minimize_action)
         window_menu.addAction(self.restore_action)
         window_menu.addSeparator()
+        window_menu.addAction(self.center_action)
         window_menu.addAction(self.always_on_top_action)
 
         # Help

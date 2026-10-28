@@ -56,10 +56,9 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon(str(icon_path)))
 
         # Set icon on taskbar
-        if sys.platform == "win32":
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-                "com.viradex.gamesuploader"
-            )
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+            "com.viradex.gamesuploader"
+        )
 
     def _setup_ui(self) -> None:
         central_widget = QWidget()
