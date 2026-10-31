@@ -6,6 +6,7 @@ from ui.dialogs.logs import LogsDialog
 from ui.dialogs.no_matching_rule import NoMatchingRuleDialog
 from ui.dialogs.oauth_waiting import OAuthWaitingDialog
 from ui.dialogs.unidentified_game import UnidentifiedGameDialog
+from ui.dialogs.upload_error import UploadErrorDialog
 
 DIALOG_DATA = {
     Dialog.LOGS: LogsDialog,
@@ -13,6 +14,7 @@ DIALOG_DATA = {
     Dialog.NO_MATCHING_RULE: NoMatchingRuleDialog,
     Dialog.OAUTH_WAITING: OAuthWaitingDialog,
     Dialog.UNIDENTIFIED_GAME: UnidentifiedGameDialog,
+    Dialog.UPLOAD_ERROR: UploadErrorDialog,
 }
 
 

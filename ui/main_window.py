@@ -1,8 +1,7 @@
 import ctypes
-import sys
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QEvent, Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QApplication,
@@ -36,16 +35,27 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(WINDOW_WIDTH, WINDOW_HEIGHT)
         self.setWindowTitle("Games Uploader")
 
-        self.center_window()
+        self.center_window(startup=True)
+
         self._setup_icon()
         self._setup_ui()
         self._setup_menu_bar()
 
-    def center_window(self) -> None:
-        screen = QApplication.primaryScreen().availableGeometry()
+    def center_window(self, startup: bool = False) -> None:
+        if startup:
+            screen = QApplication.primaryScreen().availableGeometry()
 
-        x = (screen.width() - WINDOW_WIDTH) // 2
-        y = (screen.height() - WINDOW_HEIGHT) // 2
+            width = WINDOW_WIDTH
+            height = WINDOW_HEIGHT
+        else:
+            screen = self.screen().availableGeometry()
+            rect = self.geometry()
+
+            width = rect.width()
+            height = rect.height()
+
+        x = screen.x() + (screen.width() - width) // 2
+        y = screen.y() + (screen.height() - height) // 2
 
         self.move(x, y)
 
@@ -148,6 +158,7 @@ class MainWindow(QMainWindow):
         self.menu_bar.maximize_clicked.connect(self.showMaximized)
         self.menu_bar.minimize_clicked.connect(self.showMinimized)
         self.menu_bar.restore_clicked.connect(self.showNormal)
+        self.menu_bar.center_window_clicked.connect(self.center_window)
         self.menu_bar.always_on_top_clicked.connect(self._always_on_top)
 
         self.menu_bar.dialog_clicked.connect(lambda dialog: self.open_dialog(dialog))
@@ -158,3 +169,9 @@ class MainWindow(QMainWindow):
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, enable)
         self.hide()
         self.show()
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.WindowStateChange:
+            self.menu_bar.handle_window_state_change(self.isMaximized())
+
+        super().changeEvent(event)

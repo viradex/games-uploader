@@ -2,7 +2,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 
-class DiagnosticsTab(QWidget):
+class AdvancedTab(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -16,7 +16,7 @@ class DiagnosticsTab(QWidget):
         desc_font = QFont()
         desc_font.setPointSize(12)
 
-        title = QLabel("Diagnostics")
+        title = QLabel("Advanced")
         title.setFont(title_font)
 
         desc = QLabel("Logs, troubleshooting, and advanced settings.")

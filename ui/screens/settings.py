@@ -2,7 +2,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QScrollArea, QTabWidget, QVBoxLayout, QWidget
 
 from ui.screens.settings_tabs.account import AccountTab
-from ui.screens.settings_tabs.diagnostics import DiagnosticsTab
+from ui.screens.settings_tabs.advanced import AdvancedTab
 from ui.screens.settings_tabs.games import GamesTab
 from ui.screens.settings_tabs.general import GeneralTab
 from ui.screens.settings_tabs.uploads import UploadsTab
@@ -65,7 +65,7 @@ class SettingsScreen(QWidget):
         self.tabs.addTab(self.make_scrollable(VideosTab()), "Videos")
         self.tabs.addTab(self.make_scrollable(GamesTab()), "Games")
         self.tabs.addTab(self.make_scrollable(AccountTab()), "Account")
-        self.tabs.addTab(self.make_scrollable(DiagnosticsTab()), "Diagnostics")
+        self.tabs.addTab(self.make_scrollable(AdvancedTab()), "Advanced")
 
     def make_scrollable(self, tab: QWidget) -> QScrollArea:
         scroll_area = QScrollArea()

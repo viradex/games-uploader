@@ -9,6 +9,7 @@ class ApplicationMenuBar(QMenuBar):
     maximize_clicked = Signal()
     minimize_clicked = Signal()
     restore_clicked = Signal()
+    center_window_clicked = Signal()
     always_on_top_clicked = Signal(bool)
 
     dialog_clicked = Signal(Dialog)
@@ -86,6 +87,7 @@ class ApplicationMenuBar(QMenuBar):
         self.maximize_action.triggered.connect(self.maximize_clicked.emit)
         self.minimize_action.triggered.connect(self.minimize_clicked.emit)
         self.restore_action.triggered.connect(self.restore_clicked.emit)
+        self.center_action.triggered.connect(self.center_window_clicked.emit)
         self.always_on_top_action.triggered.connect(
             lambda: self.always_on_top_clicked.emit(
                 self.always_on_top_action.isChecked()
@@ -119,3 +121,9 @@ class ApplicationMenuBar(QMenuBar):
     def _report_an_issue(self) -> None:
         url = QUrl("https://github.com/viradex/games-uploader/issues/new")
         QDesktopServices.openUrl(url)
+
+    def handle_window_state_change(self, is_maximized: bool) -> None:
+        if is_maximized:
+            self.center_action.setEnabled(False)
+        else:
+            self.center_action.setEnabled(True)

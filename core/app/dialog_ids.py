@@ -7,3 +7,4 @@ class Dialog(Enum):
     NO_MATCHING_RULE = "no_matching_rule"
     OAUTH_WAITING = "oauth_waiting"
     UNIDENTIFIED_GAME = "unidentified_game"
+    UPLOAD_ERROR = "upload_error"
